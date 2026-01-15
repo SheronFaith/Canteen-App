@@ -1,7 +1,7 @@
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'menu_model.dart';
-export 'menu_model.dart';
+import '/components/menu_manager.dart';
+import '/components/menu_model.dart';
 
 /// New Component Gen
 class MenuWidget extends StatefulWidget {

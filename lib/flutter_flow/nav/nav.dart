@@ -46,11 +46,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => HomePageWidget(),
         ),
         FFRoute(
-          name: DashboardWidget.routeName,
-          path: DashboardWidget.routePath,
-          builder: (context, params) => DashboardWidget(),
-        ),
-        FFRoute(
           name: CreateBillWidget.routeName,
           path: CreateBillWidget.routePath,
           builder: (context, params) => CreateBillWidget(),
@@ -66,14 +61,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => Dashboard2Widget(),
         ),
         FFRoute(
-          name: CreateBill2Widget.routeName,
-          path: CreateBill2Widget.routePath,
-          builder: (context, params) => CreateBill2Widget(),
-        ),
-        FFRoute(
           name: MenumanagerWidget.routeName,
           path: MenumanagerWidget.routePath,
           builder: (context, params) => MenumanagerWidget(),
+        ),
+        FFRoute(
+          name: RevenueWidget.routeName,
+          path: RevenueWidget.routePath,
+          builder: (context, params) => RevenueWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
