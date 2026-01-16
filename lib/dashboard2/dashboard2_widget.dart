@@ -1,4 +1,3 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +7,7 @@ import '/create_bill/create_bill_widget.dart';
 import '/menumanager/menumanager_widget.dart';
 import '../order/order_widget.dart';
 import '/revenue/revenue_widget.dart';
+import '../pages/printer_settings_page.dart';
 
 /// Staff Portal Dashboard
 class Dashboard2Widget extends StatefulWidget {
@@ -109,7 +109,6 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                         ),
                       ),
                       SizedBox(height: 32),
-
                       Expanded(
                         child: GridView.count(
                           crossAxisCount: 2,
@@ -126,13 +125,13 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const CreateBillWidget(),
+                                    builder: (context) =>
+                                        const CreateBillWidget(),
                                   ),
                                 );
                               },
                             ),
-
-                           _buildActionCard(
+                            _buildActionCard(
                               title: 'Scan Order',
                               icon: Icons.qr_code_scanner_rounded,
                               subtitle: 'Scan QR code',
@@ -146,8 +145,7 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                                 );
                               },
                             ),
-
-                           _buildActionCard(
+                            _buildActionCard(
                               title: 'Menu Manager',
                               icon: Icons.restaurant_menu_rounded,
                               subtitle: 'Manage menu items',
@@ -156,12 +154,12 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const MenumanagerWidget(),
+                                    builder: (context) =>
+                                        const MenumanagerWidget(),
                                   ),
                                 );
                               },
                             ),
-
                             _buildActionCard(
                               title: 'Revenue',
                               icon: Icons.currency_rupee_rounded,
@@ -172,6 +170,21 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const RevenueWidget(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildActionCard(
+                              title: 'Printer Settings',
+                              icon: Icons.print_rounded,
+                              subtitle: 'Bluetooth / USB',
+                              color: Color(0xFF2196F3),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PrinterSettingsPage(),
                                   ),
                                 );
                               },
@@ -192,12 +205,12 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
 
   // ================= ACTION CARD =================
   Widget _buildActionCard({
-  required String title,
-  required IconData icon,
-  required String subtitle,
-  required Color color,
-  VoidCallback? onTap,
-}) {
+    required String title,
+    required IconData icon,
+    required String subtitle,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(20),

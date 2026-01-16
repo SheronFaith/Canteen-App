@@ -1,6 +1,5 @@
 // Updated MenumanagerWidget.dart
 import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,13 +32,13 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MenumanagerModel());
-    
+
     // Initialize with all items
     _filteredItems = _menuManager.allMenuItems;
-    
+
     // Listen for menu updates
     _menuManager.addListener(_onMenuUpdated);
-    
+
     // Listen for search changes
     _searchController.addListener(_onSearchChanged);
   }
@@ -67,24 +66,25 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
 
   List<MenuItem> _getFilteredItems() {
     List<MenuItem> items = _menuManager.allMenuItems;
-    
+
     // Apply category filter
     if (_selectedCategory == 'Breakfast') {
       items = items.where((item) => item.category == 'breakfast').toList();
     } else if (_selectedCategory == 'Lunch') {
       items = items.where((item) => item.category == 'lunch').toList();
     }
-    
+
     // Apply search filter
     final searchQuery = _searchController.text.toLowerCase().trim();
     if (searchQuery.isNotEmpty) {
-      items = items.where((item) =>
-          item.name.toLowerCase().contains(searchQuery) ||
-          item.category.toLowerCase().contains(searchQuery) ||
-          (item.description ?? '').toLowerCase().contains(searchQuery)
-      ).toList();
+      items = items
+          .where((item) =>
+              item.name.toLowerCase().contains(searchQuery) ||
+              item.category.toLowerCase().contains(searchQuery) ||
+              (item.description ?? '').toLowerCase().contains(searchQuery))
+          .toList();
     }
-    
+
     return items;
   }
 
@@ -92,7 +92,7 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
     setState(() {
       _showSuccessBanner = true;
     });
-    
+
     // Hide banner after 3 seconds
     Future.delayed(Duration(seconds: 3), () {
       if (mounted) {
@@ -186,7 +186,7 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
                         ],
                       ),
                       SizedBox(height: 16),
-                      
+
                       // Search Bar
                       Container(
                         decoration: BoxDecoration(
@@ -239,7 +239,7 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      
+
                       // Stats Row
                       Row(
                         children: [
@@ -281,11 +281,14 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
+                    _buildCategoryChip('All',
+                        isSelected: _selectedCategory == 'All'),
                     SizedBox(width: 8),
-                    _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
+                    _buildCategoryChip('Breakfast',
+                        isSelected: _selectedCategory == 'Breakfast'),
                     SizedBox(width: 8),
-                    _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
+                    _buildCategoryChip('Lunch',
+                        isSelected: _selectedCategory == 'Lunch'),
                   ],
                 ),
               ),
@@ -572,9 +575,12 @@ class _MenumanagerWidgetState extends State<MenumanagerWidget> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: item.isVeg ? Color(0xFF4CAF50) : Color(0xFFF44336),
+                          color: item.isVeg
+                              ? Color(0xFF4CAF50)
+                              : Color(0xFFF44336),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(

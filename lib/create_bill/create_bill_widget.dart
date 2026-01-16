@@ -1,14 +1,18 @@
 // Updated CreateBillWidget.dart (partial - showing key changes)
 import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 import 'create_bill_model.dart';
 export 'create_bill_model.dart';
 import '/components/menu_model.dart';
 import '/components/menu_manager.dart';
+
+import '/models/bill.dart';
+import '/models/bill_item.dart';
+import '/services/bill_repository.dart';
+import '/printing/thermal_printer_service.dart';
 
 class CreateBillWidget extends StatefulWidget {
   const CreateBillWidget({super.key});
@@ -36,13 +40,13 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     _model = createModel(context, () => CreateBillModel());
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
-    
+
     // Initialize with all active items
     _filteredItems = _menuManager.activeMenuItems;
-    
+
     // Listen for menu updates
     _menuManager.addListener(_onMenuUpdated);
-    
+
     // Listen to search changes
     _model.textController?.addListener(_onSearchChanged);
   }
@@ -68,25 +72,26 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   void _applyFilters() {
     final searchQuery = _model.textController.text.toLowerCase();
-    
+
     List<MenuItem> items = _menuManager.activeMenuItems;
-    
+
     // Apply category filter
     if (_selectedCategory == 'Breakfast') {
       items = _menuManager.breakfastItems;
     } else if (_selectedCategory == 'Lunch') {
       items = _menuManager.lunchItems;
     }
-    
+
     // Apply search filter
     if (searchQuery.isNotEmpty) {
-      items = items.where((item) =>
-          item.name.toLowerCase().contains(searchQuery) ||
-          item.description.toLowerCase().contains(searchQuery) ||
-          item.category.toLowerCase().contains(searchQuery)
-      ).toList();
+      items = items
+          .where((item) =>
+              item.name.toLowerCase().contains(searchQuery) ||
+              item.description.toLowerCase().contains(searchQuery) ||
+              item.category.toLowerCase().contains(searchQuery))
+          .toList();
     }
-    
+
     setState(() {
       _filteredItems = items;
     });
@@ -137,10 +142,103 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     });
   }
 
+  Future<void> _onGenerateBillPressed() async {
+    void showSnack(String message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+
+    if (_cartItems.isEmpty) {
+      showSnack('Cart is empty');
+      return;
+    }
+
+    // Debug logs to ensure tap is firing.
+    // ignore: avoid_print
+    print(
+        '[CreateBill] Generate Bill tapped. Cart items: ${_cartItems.length}');
+
+    final now = DateTime.now();
+    final billItems = <BillItem>[];
+    double totalAmount = 0.0;
+
+    for (final entry in _cartItems.entries) {
+      final itemId = entry.key;
+      final qty = entry.value;
+      if (qty <= 0) {
+        continue;
+      }
+
+      final menuItem = _menuManager.allMenuItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () => MenuItem.fromData(
+          name: 'Unknown',
+          price: 0,
+          quantity: '0',
+          category: 'unknown',
+        ),
+      );
+
+      final unitPrice = menuItem.price;
+      final lineTotal = unitPrice * qty;
+      totalAmount += lineTotal;
+      billItems.add(
+        BillItem(
+          itemId: itemId,
+          itemNameSnapshot: menuItem.name,
+          unitPriceSnapshot: unitPrice,
+          qty: qty,
+          lineTotal: lineTotal,
+        ),
+      );
+    }
+
+    final bill = Bill(
+      id: const Uuid().v4(),
+      createdAt: now,
+      totalAmount: totalAmount,
+      items: billItems,
+    );
+
+    try {
+      await const BillRepository().addBill(bill);
+      // ignore: avoid_print
+      print('[CreateBill] Bill saved. id=${bill.id} total=${bill.totalAmount}');
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('[CreateBill] Failed to save bill: $e');
+      // ignore: avoid_print
+      print(st);
+      showSnack('Failed to save bill: $e');
+      return;
+    }
+
+    bool printedOk = false;
+    try {
+      printedOk = await ThermalPrinterService.instance.printBill(bill);
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('[CreateBill] Print threw: $e');
+      // ignore: avoid_print
+      print(st);
+      printedOk = false;
+    }
+
+    if (printedOk) {
+      showSnack('Bill saved & printed');
+    } else {
+      final err = ThermalPrinterService.instance.lastErrorMessage ??
+          'Printer not connected';
+      showSnack('Bill saved, printing failed: $err');
+    }
+
+    _clearCart();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -282,11 +380,14 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
+                    _buildCategoryChip('All',
+                        isSelected: _selectedCategory == 'All'),
                     SizedBox(width: 8),
-                    _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
+                    _buildCategoryChip('Breakfast',
+                        isSelected: _selectedCategory == 'Breakfast'),
                     SizedBox(width: 8),
-                    _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
+                    _buildCategoryChip('Lunch',
+                        isSelected: _selectedCategory == 'Lunch'),
                   ],
                 ),
               ),
@@ -480,44 +581,48 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             SizedBox(width: 12),
                             Expanded(
                               flex: 2,
-                              child: Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Color(0xFFE59737),
-                                      Color(0xFFFFB74D),
+                              child: GestureDetector(
+                                onTap: _onGenerateBillPressed,
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFFE59737),
+                                        Color(0xFFFFB74D),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Color(0xFFE59737).withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color(0xFFE59737).withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.receipt_long_rounded,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Generate Bill',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.receipt_long_rounded,
                                         color: Colors.white,
+                                        size: 20,
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Generate Bill',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -636,9 +741,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: item.isVeg ? Color(0xFF4CAF50) : Color(0xFFF44336),
+                          color: item.isVeg
+                              ? Color(0xFF4CAF50)
+                              : Color(0xFFF44336),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -765,7 +873,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
                                       '$quantity',
                                       style: GoogleFonts.inter(

@@ -1,7 +1,4 @@
-import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import '/components/menu_manager.dart';
-import '/components/menu_model.dart';
 
 /// New Component Gen
 class MenuWidget extends StatefulWidget {
@@ -12,27 +9,6 @@ class MenuWidget extends StatefulWidget {
 }
 
 class _MenuWidgetState extends State<MenuWidget> {
-  late MenuModel _model;
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => MenuModel());
-  }
-
-  @override
-  void dispose() {
-    _model.maybeDispose();
-
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container();

@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 
+import 'models/bill.dart';
+import 'models/bill_item.dart';
+import 'services/bill_repository.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(BillItemAdapter());
+  Hive.registerAdapter(BillAdapter());
+  await Hive.openBox<Bill>(BillRepository.billsBoxName);
 
   await FlutterFlowTheme.initialize();
 

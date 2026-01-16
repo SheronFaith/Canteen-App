@@ -1,6 +1,4 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,7 +13,6 @@ class OrderWidget extends StatefulWidget {
 }
 
 class _OrderWidgetState extends State<OrderWidget> {
-
   bool _isScanning = true;
   bool _isFlashOn = false;
 
@@ -42,14 +39,14 @@ class _OrderWidgetState extends State<OrderWidget> {
     setState(() {
       _isScanning = true;
     });
-    
+
     // Simulate scanning for 2 seconds
     Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _isScanning = false;
         });
-        
+
         // Show success message
         _showScanSuccess();
       }
@@ -264,8 +261,10 @@ class _OrderWidgetState extends State<OrderWidget> {
                               height: 40,
                               decoration: BoxDecoration(
                                 border: Border(
-                                  top: BorderSide(color: Color(0xFFE59737), width: 4),
-                                  left: BorderSide(color: Color(0xFFE59737), width: 4),
+                                  top: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
+                                  left: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
                                 ),
                               ),
                             ),
@@ -278,8 +277,10 @@ class _OrderWidgetState extends State<OrderWidget> {
                               height: 40,
                               decoration: BoxDecoration(
                                 border: Border(
-                                  top: BorderSide(color: Color(0xFFE59737), width: 4),
-                                  right: BorderSide(color: Color(0xFFE59737), width: 4),
+                                  top: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
+                                  right: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
                                 ),
                               ),
                             ),
@@ -292,8 +293,10 @@ class _OrderWidgetState extends State<OrderWidget> {
                               height: 40,
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: Color(0xFFE59737), width: 4),
-                                  left: BorderSide(color: Color(0xFFE59737), width: 4),
+                                  bottom: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
+                                  left: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
                                 ),
                               ),
                             ),
@@ -306,8 +309,10 @@ class _OrderWidgetState extends State<OrderWidget> {
                               height: 40,
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: Color(0xFFE59737), width: 4),
-                                  right: BorderSide(color: Color(0xFFE59737), width: 4),
+                                  bottom: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
+                                  right: BorderSide(
+                                      color: Color(0xFFE59737), width: 4),
                                 ),
                               ),
                             ),
@@ -356,9 +361,9 @@ class _OrderWidgetState extends State<OrderWidget> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        _isScanning 
-                          ? 'Hold steady for automatic detection'
-                          : 'Position QR code within the frame',
+                        _isScanning
+                            ? 'Hold steady for automatic detection'
+                            : 'Position QR code within the frame',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 14,
