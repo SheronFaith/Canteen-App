@@ -204,70 +204,70 @@ class _RevenueWidgetState extends State<RevenueWidget> {
           ),
 
           // Average Order Value
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-                border: Border.all(
-                  color: Color(0xFFF0F0F0),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFFFF3E0),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.shopping_basket_rounded,
-                      color: Color(0xFFFF9800),
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Average Order Value',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF333333),
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          currentData['avgOrderValue'] as String,
-                          style: GoogleFonts.inter(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFE59737),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
+          //   child: Container(
+          //     width: double.infinity,
+          //     padding: EdgeInsets.all(16),
+          //     decoration: BoxDecoration(
+          //       color: Colors.white,
+          //       borderRadius: BorderRadius.circular(16),
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: Colors.black.withOpacity(0.05),
+          //           blurRadius: 8,
+          //           offset: Offset(0, 2),
+          //         ),
+          //       ],
+          //       border: Border.all(
+          //         color: Color(0xFFF0F0F0),
+          //         width: 1,
+          //       ),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         Container(
+          //           width: 40,
+          //           height: 40,
+          //           decoration: BoxDecoration(
+          //             color: Color(0xFFFFF3E0),
+          //             borderRadius: BorderRadius.circular(12),
+          //           ),
+          //           child: Icon(
+          //             Icons.shopping_basket_rounded,
+          //             color: Color(0xFFFF9800),
+          //             size: 20,
+          //           ),
+          //         ),
+          //         SizedBox(width: 12),
+          //         Expanded(
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Text(
+          //                 'Average Order Value',
+          //                 style: GoogleFonts.inter(
+          //                   fontSize: 14,
+          //                   fontWeight: FontWeight.w500,
+          //                   color: Color(0xFF333333),
+          //                 ),
+          //               ),
+          //               SizedBox(height: 4),
+          //               Text(
+          //                 currentData['avgOrderValue'] as String,
+          //                 style: GoogleFonts.inter(
+          //                   fontSize: 20,
+          //                   fontWeight: FontWeight.w700,
+          //                   color: Color(0xFFE59737),
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           // Items Sold Header
           Padding(
@@ -321,46 +321,46 @@ class _RevenueWidgetState extends State<RevenueWidget> {
           ),
 
           // Simple Summary Footer
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16, 16, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Summary',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '${currentData['orders']} Orders • ${itemsSold.length} Different Items',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF999999),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // Container(
+          //   decoration: BoxDecoration(
+          //     color: Colors.white,
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: Colors.black.withOpacity(0.1),
+          //         blurRadius: 20,
+          //         offset: Offset(0, -4),
+          //       ),
+          //     ],
+          //   ),
+          //   child: SafeArea(
+          //     top: false,
+          //     child: Padding(
+          //       padding: EdgeInsetsDirectional.fromSTEB(16, 16, 16, 16),
+          //       child: Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Text(
+          //             'Summary',
+          //             style: GoogleFonts.inter(
+          //               fontSize: 14,
+          //               fontWeight: FontWeight.w500,
+          //               color: Color(0xFF666666),
+          //             ),
+          //           ),
+          //           SizedBox(height: 8),
+          //           Text(
+          //             '${currentData['orders']} Orders • ${itemsSold.length} Different Items',
+          //             style: GoogleFonts.inter(
+          //               fontSize: 12,
+          //               fontWeight: FontWeight.w400,
+          //               color: Color(0xFF999999),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

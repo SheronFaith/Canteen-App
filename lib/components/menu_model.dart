@@ -83,21 +83,31 @@ class MenuItem {
   
   static String _getDefaultImage(String name) {
     if (name.toLowerCase().contains('dosa')) {
-      return 'https://images.unsplash.com/photo-1741392076269-471898558663';
-    } else if (name.toLowerCase().contains('idly')) {
-      return 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38';
+      return 'https://images.unsplash.com/photo-1743517894265-c86ab035adef?q=80&w=1982&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('idli')) {
+      return 'https://images.unsplash.com/photo-1632104667384-06f58cb7ad44?q=80&w=860&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     } else if (name.toLowerCase().contains('vada')) {
-      return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0';
-    } else if (name.toLowerCase().contains('briyani')) {
-      return 'https://images.unsplash.com/photo-1605843891101-4a60adc0fcfa';
+      return 'https://images.unsplash.com/photo-1730191843435-073792ba22bc?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('biriyani')) {
+      return 'https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?q=80&w=1188&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     } else if (name.toLowerCase().contains('chicken')) {
       return 'https://images.unsplash.com/photo-1747518596416-2da5e5218d83';
-    } else if (name.toLowerCase().contains('paratha')) {
-      return 'https://images.unsplash.com/photo-1645112411341-6c9f6e04e822';
+    } else if (name.toLowerCase().contains('parotta')) {
+      return 'https://images.unsplash.com/photo-1683533743190-89c9b19f9ea6?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     } else if (name.toLowerCase().contains('rice')) {
       return 'https://images.unsplash.com/photo-1512058564366-18510be2db19';
-    } else if (name.toLowerCase().contains('omelet')) {
-      return 'https://images.unsplash.com/photo-1490818387583-1baba5e638af';
+    } else if (name.toLowerCase().contains('omelette')) {
+      return 'https://images.unsplash.com/photo-1646579933415-92109f9805df?q=80&w=1057&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('meals')) {
+      return 'https://images.unsplash.com/photo-1666251214795-a1296307d29c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('poori')) {
+      return 'https://images.unsplash.com/photo-1643892467625-65df6a500524?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('pongal')) {
+      return 'https://images.unsplash.com/photo-1716801551616-c458ec2a9b92?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('chappathi')) {
+      return 'https://images.unsplash.com/photo-1600935926387-12d9b03066f0?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else if (name.toLowerCase().contains('noodles')) {
+      return 'https://images.unsplash.com/photo-1553621043-f607bfbf6640?q=80&w=1026&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     }
     return 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38';
   }
