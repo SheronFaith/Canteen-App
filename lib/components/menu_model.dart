@@ -10,7 +10,7 @@ class MenuItem {
   bool isAvailable;
   bool isActive;
   String? imageUrl;
-  
+
   MenuItem({
     required this.id,
     required this.name,
@@ -23,7 +23,7 @@ class MenuItem {
     this.isActive = true,
     this.imageUrl,
   });
-  
+
   // Factory method to create menu items from your data
   factory MenuItem.fromData({
     required String name,
@@ -36,18 +36,18 @@ class MenuItem {
   }) {
     // Generate ID from name
     String id = name.toLowerCase().replaceAll(' ', '_');
-    
+
     // Determine if item is veg based on name/category
     bool vegStatus = isVeg ?? true;
-    if (name.toLowerCase().contains('chicken') || 
+    if (name.toLowerCase().contains('chicken') ||
         name.toLowerCase().contains('egg') ||
         name.toLowerCase().contains('nandu')) {
       vegStatus = false;
     }
-    
+
     // Generate description if not provided
     String desc = description ?? _generateDescription(name, category);
-    
+
     return MenuItem(
       id: id,
       name: name,
@@ -61,15 +61,15 @@ class MenuItem {
       imageUrl: imageUrl ?? _getDefaultImage(name),
     );
   }
-  
+
   static String _generateDescription(String name, String category) {
     if (category == 'breakfast') {
       return 'South Indian Breakfast';
     } else if (category == 'lunch') {
       if (name.toLowerCase().contains('dosa')) {
         return 'South Indian Breakfast';
-      } else if (name.toLowerCase().contains('briyani') || 
-                 name.toLowerCase().contains('fried rice')) {
+      } else if (name.toLowerCase().contains('briyani') ||
+          name.toLowerCase().contains('fried rice')) {
         return 'Rice Dish';
       } else if (name.toLowerCase().contains('chicken')) {
         return 'Non-Veg Dish';
@@ -80,7 +80,7 @@ class MenuItem {
     }
     return 'Delicious Food Item';
   }
-  
+
   static String _getDefaultImage(String name) {
     if (name.toLowerCase().contains('dosa')) {
       return 'https://images.unsplash.com/photo-1743517894265-c86ab035adef?q=80&w=1982&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';

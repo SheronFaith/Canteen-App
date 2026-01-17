@@ -1,13 +1,19 @@
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'create_bill_model.dart';
 export 'create_bill_model.dart';
 import '/components/menu_model.dart';
 import '/components/menu_manager.dart';
+import '/models/bill.dart';
+import '/models/bill_item.dart';
+import '/services/bill_repository.dart';
+import '/printing/thermal_printer_service.dart';
 
 class CreateBillWidget extends StatefulWidget {
   const CreateBillWidget({super.key});
@@ -20,6 +26,7 @@ class CreateBillWidget extends StatefulWidget {
 }
 
 class _CreateBillWidgetState extends State<CreateBillWidget> {
+  
   late CreateBillModel _model;
   final MenuManager _menuManager = MenuManager();
   List<MenuItem> _filteredItems = [];
@@ -185,6 +192,78 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
       _showFullSummary = false;
     });
   }
+
+  Future<void> _onGenerateBillPressed() async {
+  void showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  if (_cartItems.isEmpty) {
+    showSnack('Cart is empty');
+    return;
+  }
+
+  final now = DateTime.now();
+  final billItems = <BillItem>[];
+  double totalAmount = 0.0;
+
+  for (final entry in _cartItems.entries) {
+    final itemId = entry.key;
+    final qty = entry.value;
+    if (qty <= 0) continue;
+
+    final menuItem = _menuManager.allMenuItems.firstWhere(
+      (item) => item.id == itemId,
+      orElse: () => MenuItem.fromData(
+        name: 'Unknown',
+        price: 0,
+        quantity: '0',
+        category: 'unknown',
+      ),
+    );
+
+    final unitPrice = menuItem.price;
+    final lineTotal = unitPrice * qty;
+    totalAmount += lineTotal;
+
+    billItems.add(
+      BillItem(
+        itemId: itemId,
+        itemNameSnapshot: menuItem.name,
+        unitPriceSnapshot: unitPrice,
+        qty: qty,
+        lineTotal: lineTotal,
+      ),
+    );
+  }
+
+  final bill = Bill(
+    id: const Uuid().v4(),
+    createdAt: now,
+    totalAmount: totalAmount,
+    items: billItems,
+  );
+
+  bool printedOk = false;
+  try {
+    printedOk = await ThermalPrinterService.instance.printBill(bill);
+  } catch (e) {
+    printedOk = false;
+  }
+
+  if (printedOk) {
+    await const BillRepository().addBill(bill);
+    showSnack('Bill printed & saved');
+    _clearCart();
+  } else {
+    showSnack(
+      'Printing failed: ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
+    );
+  }
+}
 
   void _toggleSummaryPanel() {
     setState(() {
@@ -1267,11 +1346,10 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                        onTap: () {
-                          // Add your generate bill logic here
-                          _toggleSummaryPanel();
-                          // Show bill generation dialog or navigate
-                        },
+                       onTap: () async {
+                        _toggleSummaryPanel();
+                        await _onGenerateBillPressed();
+                      },
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(

@@ -1,0 +1,353 @@
+class StaticMenuItemData {
+  final String id;
+  final String name;
+  final String category; // "breakfast", "lunch"
+  final double price;
+  final bool isAvailable;
+
+  // Extra fields used by existing UI/model.
+  final String quantity;
+  final bool? isVeg;
+  final String? description;
+  final String? imageUrl;
+
+  const StaticMenuItemData({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.price,
+    required this.quantity,
+    this.isAvailable = true,
+    this.isVeg,
+    this.description,
+    this.imageUrl,
+  });
+}
+
+/// Static menu for "Abiruchi Food Works".
+///
+/// Note: `id` values are kept consistent with the previous `MenuItem.fromData`
+/// behavior (lowercased + spaces replaced with underscores).
+const List<StaticMenuItemData> abiruchiFoodWorksMenu = [
+  // Breakfast
+  StaticMenuItemData(
+    id: 'idly',
+    name: 'Idly',
+    category: 'breakfast',
+    price: 10.00,
+    quantity: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38',
+  ),
+  StaticMenuItemData(
+    id: 'pongal_(or)_kitchadi',
+    name: 'Pongal (or) Kitchadi',
+    category: 'breakfast',
+    price: 40.00,
+    quantity: '250 grm',
+  ),
+  StaticMenuItemData(
+    id: 'vada',
+    name: 'Vada',
+    category: 'breakfast',
+    price: 10.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'poori',
+    name: 'Poori',
+    category: 'breakfast',
+    price: 30.00,
+    quantity: '2',
+  ),
+  StaticMenuItemData(
+    id: 'plain_dosa',
+    name: 'Plain Dosa',
+    category: 'breakfast',
+    price: 40.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'masala_dosa',
+    name: 'Masala Dosa',
+    category: 'breakfast',
+    price: 50.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'onion_dosa',
+    name: 'Onion Dosa',
+    category: 'breakfast',
+    price: 50.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'podi_dosa',
+    name: 'Podi Dosa',
+    category: 'breakfast',
+    price: 50.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'paneer_dosa',
+    name: 'Paneer Dosa',
+    category: 'breakfast',
+    price: 70.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'mushroom_dosa',
+    name: 'Mushroom Dosa',
+    category: 'breakfast',
+    price: 70.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'babycorn_dosa',
+    name: 'Babycorn Dosa',
+    category: 'breakfast',
+    price: 70.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'ghee_dosa',
+    name: 'Ghee Dosa',
+    category: 'breakfast',
+    price: 70.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'rava_dosa',
+    name: 'Rava Dosa',
+    category: 'breakfast',
+    price: 60.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'rava_masala_dosa',
+    name: 'Rava Masala Dosa',
+    category: 'breakfast',
+    price: 60.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'egg_dosa',
+    name: 'Egg Dosa',
+    category: 'breakfast',
+    price: 50.00,
+    quantity: '1',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_dosa',
+    name: 'Chicken Dosa',
+    category: 'breakfast',
+    price: 70.00,
+    quantity: '1',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'kari_dosa',
+    name: 'Kari Dosa',
+    category: 'breakfast',
+    price: 100.00,
+    quantity: '1',
+  ),
+
+  // Lunch
+  StaticMenuItemData(
+    id: 'veg_meals',
+    name: 'Veg Meals',
+    category: 'lunch',
+    price: 80.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'mini_meals',
+    name: 'Mini Meals',
+    category: 'lunch',
+    price: 90.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'verity_rice_/_poriyal',
+    name: 'Verity Rice / Poriyal',
+    category: 'lunch',
+    price: 60.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'chappathi_with_kurma',
+    name: 'Chappathi With Kurma',
+    category: 'lunch',
+    price: 40.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'paratha_with_kurma',
+    name: 'Paratha With Kurma',
+    category: 'lunch',
+    price: 40.00,
+    quantity: '1',
+  ),
+  StaticMenuItemData(
+    id: 'chilly_paratha_with_raitha',
+    name: 'Chilly Paratha With Raitha',
+    category: 'lunch',
+    price: 70.00,
+    quantity: '300 grm',
+  ),
+  StaticMenuItemData(
+    id: 'veg_briyani_/_raitha',
+    name: 'Veg Briyani / Raitha',
+    category: 'lunch',
+    price: 80.00,
+    quantity: '450 grm',
+  ),
+  StaticMenuItemData(
+    id: 'veg_fried_rice_/_noodles',
+    name: 'Veg Fried Rice / Noodles',
+    category: 'lunch',
+    price: 90.00,
+    quantity: '400 grm',
+  ),
+  StaticMenuItemData(
+    id: 'gobi_fried_rice_/_noodles',
+    name: 'Gobi Fried Rice / Noodles',
+    category: 'lunch',
+    price: 90.00,
+    quantity: '400 grm',
+  ),
+  StaticMenuItemData(
+    id: 'mushroom_fried_rice_/_noodles',
+    name: 'Mushroom Fried Rice / Noodles',
+    category: 'lunch',
+    price: 90.00,
+    quantity: '400 grm',
+  ),
+  StaticMenuItemData(
+    id: 'paneer_fried_rice_/_noodles',
+    name: 'Paneer Fried Rice / Noodles',
+    category: 'lunch',
+    price: 100.00,
+    quantity: '400 grm',
+  ),
+  StaticMenuItemData(
+    id: 'egg_fried_rice_/_noodles',
+    name: 'Egg Fried Rice / Noodles',
+    category: 'lunch',
+    price: 100.00,
+    quantity: '400 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_fried_rice_/_noodles',
+    name: 'Chicken Fried Rice / Noodles',
+    category: 'lunch',
+    price: 110.00,
+    quantity: '400 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chilly_chicken',
+    name: 'Chilly Chicken',
+    category: 'lunch',
+    price: 130.00,
+    quantity: '150 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_manchuriyar',
+    name: 'Chicken Manchuriyar',
+    category: 'lunch',
+    price: 130.00,
+    quantity: '150 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'dragon_chicken',
+    name: 'Dragon Chicken',
+    category: 'lunch',
+    price: 150.00,
+    quantity: '150 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'garlic_chicken',
+    name: 'Garlic Chicken',
+    category: 'lunch',
+    price: 150.00,
+    quantity: '150 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_lollypop',
+    name: 'Chicken Lollypop',
+    category: 'lunch',
+    price: 120.00,
+    quantity: '4 pc',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_65',
+    name: 'Chicken 65',
+    category: 'lunch',
+    price: 120.00,
+    quantity: '150 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'veg_kothu_paratha',
+    name: 'Veg Kothu Paratha',
+    category: 'lunch',
+    price: 80.00,
+    quantity: '300 grm',
+  ),
+  StaticMenuItemData(
+    id: 'chicken_kothu_paratha',
+    name: 'Chicken Kothu Paratha',
+    category: 'lunch',
+    price: 100.00,
+    quantity: '300 grm',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'chicken_briyani/egg/rittha/birinjai',
+    name: 'Chicken Briyani/egg/rittha/birinjai',
+    category: 'lunch',
+    price: 130.00,
+    quantity: '1',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'single_omblet',
+    name: 'Single Omblet',
+    category: 'lunch',
+    price: 15.00,
+    quantity: '1 egg',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'double_omblet',
+    name: 'Double Omblet',
+    category: 'lunch',
+    price: 25.00,
+    quantity: '2 egg',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'kalaki',
+    name: 'Kalaki',
+    category: 'lunch',
+    price: 20.00,
+    quantity: '1 egg',
+    isVeg: false,
+  ),
+  StaticMenuItemData(
+    id: 'nandu_omblet',
+    name: 'Nandu Omblet',
+    category: 'lunch',
+    price: 40.00,
+    quantity: '1 egg',
+    isVeg: false,
+  ),
+];
