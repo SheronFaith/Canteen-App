@@ -12,10 +12,11 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
 
   bytes.addAll(
     generator.text(
-      'Abiruchi Food Works',
+      ' Abiruchi Food Work ',
       styles: const PosStyles(
         align: PosAlign.center,
         bold: true,
+        fontType: PosFontType.fontB,
         height: PosTextSize.size2,
         width: PosTextSize.size2,
       ),
@@ -44,11 +45,17 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
           PosColumn(
               text: nameQty,
               width: 8,
-              styles: const PosStyles(align: PosAlign.left)),
+              styles: const PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontB,
+              )),
           PosColumn(
               text: total,
               width: 4,
-              styles: const PosStyles(align: PosAlign.right)),
+              styles: const PosStyles(
+                align: PosAlign.right,
+                fontType: PosFontType.fontB,
+              )),
         ],
       ),
     );
@@ -74,14 +81,6 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
   );
 
   bytes.addAll(generator.feed(1));
-
-  bytes.addAll(
-    generator.text(
-      'Thank you!',
-      styles: const PosStyles(align: PosAlign.center, bold: true),
-      linesAfter: 1,
-    ),
-  );
 
   bytes.addAll(generator.cut());
 

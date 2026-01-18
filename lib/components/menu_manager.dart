@@ -61,7 +61,7 @@ class MenuManager {
   void _initializeMenuItems() {
     // Clear existing items
     _allMenuItems.clear();
-    
+
     // Breakfast Items
     _allMenuItems.addAll([
       MenuItem.fromData(
@@ -169,7 +169,7 @@ class MenuManager {
         category: 'breakfast',
       ),
     ]);
-    
+
     // Lunch Items
     _allMenuItems.addAll([
       MenuItem.fromData(
@@ -269,7 +269,7 @@ class MenuManager {
         category: 'lunch',
         isVeg: false,
       ),
-        MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Egg Noodles',
         price: 100.00,
         quantity: '400 grm',

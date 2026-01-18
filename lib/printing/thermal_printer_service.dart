@@ -475,10 +475,11 @@ class ThermalPrinterService {
 
     final out = <int>[];
     out.addAll(generator.text(
-      'Abiruchi Food Works',
+      ' Abiruchi Food Work ',
       styles: const PosStyles(
         align: PosAlign.center,
         bold: true,
+        fontType: PosFontType.fontB,
         height: PosTextSize.size2,
         width: PosTextSize.size2,
       ),

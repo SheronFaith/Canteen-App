@@ -224,7 +224,6 @@ class _RevenueWidgetState extends State<RevenueWidget> {
                         ),
                 ),
               ),
-
             ],
           ),
         );
