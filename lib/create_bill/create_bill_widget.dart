@@ -253,21 +253,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     }
 
     if (printedOk) {
-      try {
-        await const BillRepository().addBill(bill);
-        showSnack('Bill printed & saved');
-        _clearCart();
-      } catch (_) {
-        showSnack('Printed, but failed to save bill');
-      }
+      await const BillRepository().addBill(bill);
+      showSnack('Bill printed & saved');
+      _clearCart();
     } else {
-      // Safety net: ensure a failed print never leaves a stored bill behind.
-      // If it was never saved, this is a no-op.
-      try {
-        await const BillRepository().deleteBill(bill.id);
-      } catch (_) {}
       showSnack(
-        'Printing failed (not saved): ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
+        'Printing failed: ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
       );
     }
   }

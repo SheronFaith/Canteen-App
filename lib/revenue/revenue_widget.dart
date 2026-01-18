@@ -301,8 +301,31 @@ class _RevenueWidgetState extends State<RevenueWidget> {
     );
   }
 
+  String _periodTabLabel(String periodKey) {
+    final anchor = _anchorDate;
+    if (anchor == null) return periodKey;
+
+    switch (periodKey) {
+      case 'Today':
+        return DateFormat('dd MMM').format(anchor);
+      case 'This Week':
+        final dayStart = DateTime(anchor.year, anchor.month, anchor.day);
+        final weekStart =
+            dayStart.subtract(Duration(days: dayStart.weekday - 1));
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        final startLabel = DateFormat('dd MMM').format(weekStart);
+        final endLabel = DateFormat('dd MMM').format(weekEnd);
+        return '$startLabel-$endLabel';
+      case 'This Month':
+        return DateFormat('MMM yyyy').format(anchor);
+      default:
+        return periodKey;
+    }
+  }
+
   Widget _buildPeriodTab(String label, int index) {
     bool isSelected = _selectedPeriod == label;
+    final displayLabel = _periodTabLabel(label);
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -316,12 +339,18 @@ class _RevenueWidgetState extends State<RevenueWidget> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : Color(0xFF666666),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  displayLabel,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Colors.white : Color(0xFF666666),
+                  ),
+                ),
               ),
             ),
           ),
