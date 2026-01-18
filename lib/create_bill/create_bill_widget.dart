@@ -1,4 +1,3 @@
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -26,7 +25,6 @@ class CreateBillWidget extends StatefulWidget {
 }
 
 class _CreateBillWidgetState extends State<CreateBillWidget> {
-  
   late CreateBillModel _model;
   final MenuManager _menuManager = MenuManager();
   List<MenuItem> _filteredItems = [];
@@ -43,13 +41,13 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     _model = createModel(context, () => CreateBillModel());
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
-    
+
     // Initialize with all active items
     _filteredItems = _menuManager.activeMenuItems;
-    
+
     // Listen for menu updates
     _menuManager.addListener(_onMenuUpdated);
-    
+
     // Listen to search changes
     _model.textController?.addListener(_onSearchChanged);
   }
@@ -75,27 +73,28 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   void _applyFilters() {
     final searchQuery = _model.textController.text.toLowerCase();
-    
+
     List<MenuItem> items = _menuManager.activeMenuItems;
-    
+
     // Apply category filter
-      if (_selectedCategory == 'Breakfast') {
-    items = _menuManager.breakfastItems;
+    if (_selectedCategory == 'Breakfast') {
+      items = _menuManager.breakfastItems;
     } else if (_selectedCategory == 'Lunch') {
       items = _menuManager.lunchItems;
     } else if (_selectedCategory != 'All') {
       items = _filterByCategory(_selectedCategory);
     }
-    
+
     // Apply search filter
     if (searchQuery.isNotEmpty) {
-      items = items.where((item) =>
-          item.name.toLowerCase().contains(searchQuery) ||
-          item.description.toLowerCase().contains(searchQuery) ||
-          item.category.toLowerCase().contains(searchQuery)
-      ).toList();
+      items = items
+          .where((item) =>
+              item.name.toLowerCase().contains(searchQuery) ||
+              item.description.toLowerCase().contains(searchQuery) ||
+              item.category.toLowerCase().contains(searchQuery))
+          .toList();
     }
-    
+
     setState(() {
       _filteredItems = items;
     });
@@ -103,42 +102,41 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   //sort items
   List<MenuItem> _filterByCategory(String category) {
-  return _menuManager.activeMenuItems.where((item) {
-    final name = item.name.toLowerCase();
-    final desc = item.description.toLowerCase();
+    return _menuManager.activeMenuItems.where((item) {
+      final name = item.name.toLowerCase();
+      final desc = item.description.toLowerCase();
 
-    switch (category) {
-      case 'Dosa':
-        return name.contains('dosa');
+      switch (category) {
+        case 'Dosa':
+          return name.contains('dosa');
 
-      case 'Rice Items':
-        return name.contains('rice') ||
-               name.contains('meals') ||
-               name.contains('biryani');
+        case 'Rice Items':
+          return name.contains('rice') ||
+              name.contains('meals') ||
+              name.contains('biryani');
 
-      case 'Fried Rice & Noodles':
-        return name.contains('fried') ||
-               name.contains('noodle');
+        case 'Fried Rice & Noodles':
+          return name.contains('fried') || name.contains('noodle');
 
-      case 'Parotta & Kothu':
-        return name.contains('parotta') ||
-               name.contains('paratha') ||
-               name.contains('kothu');
+        case 'Parotta & Kothu':
+          return name.contains('parotta') ||
+              name.contains('paratha') ||
+              name.contains('kothu');
 
-      case 'Chicken':
-        return name.contains('chicken');
+        case 'Chicken':
+          return name.contains('chicken');
 
-      case 'Egg':
-        return name.contains('egg') ||
+        case 'Egg':
+          return name.contains('egg') ||
               name.contains('omelette') ||
               name.contains('omblet') ||
               name.contains('kalaki');
 
-      default:
-        return false;
-    }
-  }).toList();
-}
+        default:
+          return false;
+      }
+    }).toList();
+  }
 
   void _updateTotalAmount() {
     double total = 0.0;
@@ -194,76 +192,85 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   }
 
   Future<void> _onGenerateBillPressed() async {
-  void showSnack(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    void showSnack(String message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+
+    if (_cartItems.isEmpty) {
+      showSnack('Cart is empty');
+      return;
+    }
+
+    final now = DateTime.now();
+    final billItems = <BillItem>[];
+    double totalAmount = 0.0;
+
+    for (final entry in _cartItems.entries) {
+      final itemId = entry.key;
+      final qty = entry.value;
+      if (qty <= 0) continue;
+
+      final menuItem = _menuManager.allMenuItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () => MenuItem.fromData(
+          name: 'Unknown',
+          price: 0,
+          quantity: '0',
+          category: 'unknown',
+        ),
+      );
+
+      final unitPrice = menuItem.price;
+      final lineTotal = unitPrice * qty;
+      totalAmount += lineTotal;
+
+      billItems.add(
+        BillItem(
+          itemId: itemId,
+          itemNameSnapshot: menuItem.name,
+          unitPriceSnapshot: unitPrice,
+          qty: qty,
+          lineTotal: lineTotal,
+        ),
+      );
+    }
+
+    final bill = Bill(
+      id: const Uuid().v4(),
+      createdAt: now,
+      totalAmount: totalAmount,
+      items: billItems,
     );
+
+    bool printedOk = false;
+    try {
+      printedOk = await ThermalPrinterService.instance.printBill(bill);
+    } catch (e) {
+      printedOk = false;
+    }
+
+    if (printedOk) {
+      try {
+        await const BillRepository().addBill(bill);
+        showSnack('Bill printed & saved');
+        _clearCart();
+      } catch (_) {
+        showSnack('Printed, but failed to save bill');
+      }
+    } else {
+      // Safety net: ensure a failed print never leaves a stored bill behind.
+      // If it was never saved, this is a no-op.
+      try {
+        await const BillRepository().deleteBill(bill.id);
+      } catch (_) {}
+      showSnack(
+        'Printing failed (not saved): ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
+      );
+    }
   }
-
-  if (_cartItems.isEmpty) {
-    showSnack('Cart is empty');
-    return;
-  }
-
-  final now = DateTime.now();
-  final billItems = <BillItem>[];
-  double totalAmount = 0.0;
-
-  for (final entry in _cartItems.entries) {
-    final itemId = entry.key;
-    final qty = entry.value;
-    if (qty <= 0) continue;
-
-    final menuItem = _menuManager.allMenuItems.firstWhere(
-      (item) => item.id == itemId,
-      orElse: () => MenuItem.fromData(
-        name: 'Unknown',
-        price: 0,
-        quantity: '0',
-        category: 'unknown',
-      ),
-    );
-
-    final unitPrice = menuItem.price;
-    final lineTotal = unitPrice * qty;
-    totalAmount += lineTotal;
-
-    billItems.add(
-      BillItem(
-        itemId: itemId,
-        itemNameSnapshot: menuItem.name,
-        unitPriceSnapshot: unitPrice,
-        qty: qty,
-        lineTotal: lineTotal,
-      ),
-    );
-  }
-
-  final bill = Bill(
-    id: const Uuid().v4(),
-    createdAt: now,
-    totalAmount: totalAmount,
-    items: billItems,
-  );
-
-  bool printedOk = false;
-  try {
-    printedOk = await ThermalPrinterService.instance.printBill(bill);
-  } catch (e) {
-    printedOk = false;
-  }
-
-  if (printedOk) {
-    await const BillRepository().addBill(bill);
-    showSnack('Bill printed & saved');
-    _clearCart();
-  } else {
-    showSnack(
-      'Printing failed: ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
-    );
-  }
-}
 
   void _toggleSummaryPanel() {
     setState(() {
@@ -274,7 +281,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -413,7 +420,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 ),
 
                 // Categories Filter
-               // Categories Filter (2-row layout)
+                // Categories Filter (2-row layout)
                 Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
                   child: Column(
@@ -423,36 +430,41 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
-                          _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
-                          _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
-                          _buildCategoryChip('Dosa', isSelected: _selectedCategory == 'Dosa'),
-                          _buildCategoryChip('Rice Items', isSelected: _selectedCategory == 'Rice Items'),
+                          _buildCategoryChip('All',
+                              isSelected: _selectedCategory == 'All'),
+                          _buildCategoryChip('Breakfast',
+                              isSelected: _selectedCategory == 'Breakfast'),
+                          _buildCategoryChip('Lunch',
+                              isSelected: _selectedCategory == 'Lunch'),
+                          _buildCategoryChip('Dosa',
+                              isSelected: _selectedCategory == 'Dosa'),
+                          _buildCategoryChip('Rice Items',
+                              isSelected: _selectedCategory == 'Rice Items'),
                         ],
                       ),
-
                       SizedBox(height: 8),
-
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
                           _buildCategoryChip(
                             'Fried Rice & Noodles',
-                            isSelected: _selectedCategory == 'Fried Rice & Noodles',
+                            isSelected:
+                                _selectedCategory == 'Fried Rice & Noodles',
                           ),
                           _buildCategoryChip(
                             'Parotta & Kothu',
                             isSelected: _selectedCategory == 'Parotta & Kothu',
                           ),
-                          _buildCategoryChip('Chicken', isSelected: _selectedCategory == 'Chicken'),
-                          _buildCategoryChip('Egg', isSelected: _selectedCategory == 'Egg'),
+                          _buildCategoryChip('Chicken',
+                              isSelected: _selectedCategory == 'Chicken'),
+                          _buildCategoryChip('Egg',
+                              isSelected: _selectedCategory == 'Egg'),
                         ],
                       ),
                     ],
                   ),
                 ),
-
 
                 // Items Count Header
                 Padding(
@@ -469,7 +481,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: Color(0xFFE8F5E9),
                           borderRadius: BorderRadius.circular(20),
@@ -490,7 +503,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 // Menu Items List
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(16,0,16,_cartItems.isNotEmpty ? 80 : 0,),
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      16,
+                      0,
+                      16,
+                      _cartItems.isNotEmpty ? 80 : 0,
+                    ),
                     child: _filteredItems.isEmpty
                         ? Center(
                             child: Column(
@@ -679,9 +697,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: item.isVeg ? Color(0xFF4CAF50) : Color(0xFFF44336),
+                          color: item.isVeg
+                              ? Color(0xFF4CAF50)
+                              : Color(0xFFF44336),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -808,7 +829,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
                                       '$quantity',
                                       style: GoogleFonts.inter(
@@ -897,8 +919,9 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   // NEW: Small Floating Summary Card
   Widget _buildSmallSummaryCard() {
-    final totalItems = _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
-    
+    final totalItems =
+        _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -935,7 +958,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ),
             ),
             SizedBox(width: 12),
-            
+
             // Summary Text
             Expanded(
               child: Column(
@@ -961,7 +984,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 ],
               ),
             ),
-            
+
             // View Details Button
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -998,7 +1021,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   Widget _buildFullSummaryPanel() {
     final cartItemsList = _cartItems.entries.toList();
     final totalItems = cartItemsList.fold(0, (sum, entry) => sum + entry.value);
-    
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -1028,7 +1051,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                     ),
                   ),
                 ),
-                
+
                 // Close Button
                 GestureDetector(
                   onTap: _toggleSummaryPanel,
@@ -1052,7 +1075,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ],
             ),
           ),
-          
+
           // Header
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -1085,11 +1108,11 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ],
             ),
           ),
-          
+
           // Items List
           Expanded(
             child: Padding(
-            padding: EdgeInsets.fromLTRB(24, 12, 24, 0),
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 0),
               child: cartItemsList.isEmpty
                   ? Center(
                       child: Column(
@@ -1130,7 +1153,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             category: 'unknown',
                           ),
                         );
-                        
+
                         return Row(
                           children: [
                             // Item Info
@@ -1161,7 +1184,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                               ),
                             ),
                             SizedBox(width: 16),
-                            
+
                             // Quantity Controls
                             Container(
                               height: 36,
@@ -1190,10 +1213,11 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Quantity
                                   Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
                                       '${entry.value}',
                                       style: GoogleFonts.inter(
@@ -1203,7 +1227,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Plus Button
                                   GestureDetector(
                                     onTap: () => _addToCart(item.id),
@@ -1227,7 +1251,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                               ),
                             ),
                             SizedBox(width: 16),
-                            
+
                             // Remove Button
                             GestureDetector(
                               onTap: () => _removeItemCompletely(item.id),
@@ -1251,28 +1275,28 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                 ),
                               ),
                             ),
-                            
+
                             // Item Total
                             SizedBox(width: 16),
                             SizedBox(
-                            width: 80,
-                            child: Text(
-                              '₹${(item.price * entry.value).toStringAsFixed(2)}',
-                              textAlign: TextAlign.right,
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF333333),
+                              width: 80,
+                              child: Text(
+                                '₹${(item.price * entry.value).toStringAsFixed(2)}',
+                                textAlign: TextAlign.right,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF333333),
+                                ),
                               ),
                             ),
-                          ),
                           ],
                         );
                       },
                     ),
             ),
           ),
-          
+
           // Total & Actions
           Container(
             decoration: BoxDecoration(
@@ -1307,7 +1331,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                   ],
                 ),
                 SizedBox(height: 24),
-                
+
                 // Action Buttons
                 Row(
                   children: [
@@ -1341,15 +1365,15 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       ),
                     ),
                     SizedBox(width: 16),
-                    
+
                     // Generate Bill Button
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                       onTap: () async {
-                        _toggleSummaryPanel();
-                        await _onGenerateBillPressed();
-                      },
+                        onTap: () async {
+                          _toggleSummaryPanel();
+                          await _onGenerateBillPressed();
+                        },
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(

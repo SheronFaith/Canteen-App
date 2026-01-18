@@ -426,6 +426,19 @@ class ThermalPrinterService {
     _lastError = null;
 
     if (_connectionType == ThermalConnectionType.bluetooth) {
+      // If we can verify that the selected Bluetooth device is NOT bonded,
+      // fail fast (prevents treating a print as successful when the printer
+      // is not actually available).
+      final selectedMac = _bluetoothMac;
+      if (selectedMac != null && selectedMac.isNotEmpty) {
+        final bonded = await _isBluetoothDeviceBonded(selectedMac);
+        if (bonded == false) {
+          _lastError =
+              'Selected printer is not paired. Pair it in Bluetooth settings.';
+          return false;
+        }
+      }
+
       final conn = _btConnection;
       if (conn == null || !conn.isConnected) {
         final ok = await connectBluetooth();
@@ -452,6 +465,22 @@ class ThermalPrinterService {
     }
 
     if (_connectionType == ThermalConnectionType.usb) {
+      // Require that USB discovery can see the selected device before we
+      // attempt to connect/send. This avoids false-positive "success" results
+      // from the plugin when no printer is physically connected.
+      final selectedUsb = _usbDevice;
+      if (selectedUsb != null) {
+        final present = await _isUsbDevicePresent(selectedUsb);
+        if (!present) {
+          _usbConnected = false;
+          _lastError = 'USB printer not connected';
+          return false;
+        }
+      } else {
+        _lastError = 'No USB printer selected';
+        return false;
+      }
+
       if (!_usbConnected) {
         final ok = await connectUsb();
         if (!ok) return false;
@@ -467,6 +496,70 @@ class ThermalPrinterService {
 
     _lastError = 'No printer connected';
     return false;
+  }
+
+  /// Returns:
+  /// - `true` when the OS reports [mac] among bonded devices.
+  /// - `false` when the bonded list does not contain [mac].
+  ///
+  /// If Bluetooth is disabled or the list can't be fetched, this returns `null`
+  /// and printing will fall back to the regular connection attempt.
+  Future<bool?> _isBluetoothDeviceBonded(String mac) async {
+    try {
+      final enabled = await FlutterBluetoothSerial.instance.isEnabled;
+      if (enabled != true) return null;
+
+      final devices = await FlutterBluetoothSerial.instance.getBondedDevices();
+      return devices.any((d) => d.address == mac);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Returns `true` only if USB discovery sees a device matching the selected
+  /// vendorId/productId.
+  Future<bool> _isUsbDevicePresent(UsbPrinterDeviceInfo selected) async {
+    try {
+      final found = <UsbPrinterDeviceInfo>[];
+
+      final sub = PrinterManager.instance
+          .discovery(type: PrinterType.usb)
+          .listen((device) {
+        final vid = device.vendorId;
+        final pid = device.productId;
+        final name = device.name;
+        if (name.isEmpty) return;
+        if (vid == null || pid == null || vid.isEmpty || pid.isEmpty) return;
+
+        found.add(
+          UsbPrinterDeviceInfo(
+            id: UsbPrinterDeviceInfo.buildId(
+              vendorId: vid,
+              productId: pid,
+              name: name,
+            ),
+            vendorId: vid,
+            productId: pid,
+            name: name,
+          ),
+        );
+      });
+
+      // Give discovery a moment; this is intentionally short to keep printing
+      // responsive while still detecting "no device" cases.
+      await Future.delayed(const Duration(milliseconds: 700));
+      await sub.cancel();
+
+      if (found.isEmpty) return false;
+
+      return found.any(
+        (d) =>
+            d.vendorId == selected.vendorId &&
+            d.productId == selected.productId,
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<Uint8List> _buildTestReceiptBytes() async {

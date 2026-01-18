@@ -40,6 +40,90 @@ class RevenueService {
     };
   }
 
+  /// Builds period totals (day/week/month) for a specific [anchorDate].
+  ///
+  /// Unlike [buildPeriodData], this treats the periods as full day/week/month
+  /// windows based on [anchorDate] (useful for historical reporting).
+  Map<String, Map<String, dynamic>> buildPeriodDataForAnchor(
+      DateTime anchorDate) {
+    final startOfDay =
+        DateTime(anchorDate.year, anchorDate.month, anchorDate.day);
+    final endOfDay = startOfDay
+        .add(const Duration(days: 1))
+        .subtract(const Duration(microseconds: 1));
+
+    final weekStart =
+        startOfDay.subtract(Duration(days: startOfDay.weekday - 1));
+    final weekEnd = weekStart
+        .add(const Duration(days: 7))
+        .subtract(const Duration(microseconds: 1));
+
+    final monthStart = DateTime(anchorDate.year, anchorDate.month, 1);
+    final nextMonthStart = (anchorDate.month == 12)
+        ? DateTime(anchorDate.year + 1, 1, 1)
+        : DateTime(anchorDate.year, anchorDate.month + 1, 1);
+    final monthEnd = nextMonthStart.subtract(const Duration(microseconds: 1));
+
+    final bills = _repository.getAllBills();
+
+    return {
+      'Today': _computeForRange(
+        bills: bills,
+        rangeStart: startOfDay,
+        rangeEnd: endOfDay,
+      ),
+      'This Week': _computeForRange(
+        bills: bills,
+        rangeStart: weekStart,
+        rangeEnd: weekEnd,
+      ),
+      'This Month': _computeForRange(
+        bills: bills,
+        rangeStart: monthStart,
+        rangeEnd: monthEnd,
+      ),
+    };
+  }
+
+  /// Returns totals grouped by month (descending), optionally limited to the
+  /// latest [limit] months.
+  List<Map<String, dynamic>> buildMonthlyTotals({int? limit}) {
+    final bills = _repository.getAllBills();
+
+    final Map<String, _MonthAgg> byMonth = {};
+    for (final bill in bills) {
+      final d = bill.createdAt;
+      final key = '${d.year}-${d.month.toString().padLeft(2, '0')}';
+      final agg = byMonth.putIfAbsent(
+          key, () => _MonthAgg(year: d.year, month: d.month));
+      agg.orders += 1;
+      agg.revenue += bill.totalAmount;
+    }
+
+    final rows = byMonth.values.toList()
+      ..sort((a, b) {
+        final aKey = a.year * 100 + a.month;
+        final bKey = b.year * 100 + b.month;
+        return bKey.compareTo(aKey);
+      });
+
+    final formatter = DateFormat('MMM yyyy');
+    final mapped = rows
+        .map(
+          (m) => {
+            'month': formatter.format(DateTime(m.year, m.month, 1)),
+            'revenue': _formatCurrency(m.revenue, decimals: 0),
+            'orders': m.orders,
+          },
+        )
+        .toList();
+
+    if (limit != null && limit > 0 && mapped.length > limit) {
+      return mapped.take(limit).toList();
+    }
+    return mapped;
+  }
+
   Map<String, dynamic> emptyPeriodData() => {
         'revenue': _formatCurrency(0, decimals: 0),
         'orders': 0,
@@ -126,4 +210,13 @@ class RevenueService {
 class _TopItemAgg {
   int qty = 0;
   double amount = 0.0;
+}
+
+class _MonthAgg {
+  _MonthAgg({required this.year, required this.month});
+
+  final int year;
+  final int month;
+  int orders = 0;
+  double revenue = 0.0;
 }
