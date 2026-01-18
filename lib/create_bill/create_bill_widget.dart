@@ -1,4 +1,3 @@
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -14,6 +13,7 @@ import '/models/bill.dart';
 import '/models/bill_item.dart';
 import '/services/bill_repository.dart';
 import '/printing/thermal_printer_service.dart';
+import 'package:flutter/rendering.dart';
 
 class CreateBillWidget extends StatefulWidget {
   const CreateBillWidget({super.key});
@@ -26,16 +26,43 @@ class CreateBillWidget extends StatefulWidget {
 }
 
 class _CreateBillWidgetState extends State<CreateBillWidget> {
-  
+
+  late ScrollController _scrollController;
+  bool _showPopularOrders = true;
+
   late CreateBillModel _model;
   final MenuManager _menuManager = MenuManager();
   List<MenuItem> _filteredItems = [];
   String _selectedCategory = 'All';
   final Map<String, int> _cartItems = {}; // itemId -> quantity
   double _totalAmount = 0.0;
-  bool _showFullSummary = false; // NEW: Controls full summary panel visibility
+  bool _showFullSummary = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Popular items list - mapping item names to find actual MenuItems
+  final List<Map<String, dynamic>> _popularItems = [
+    {
+      'name': 'Chicken Noodles',
+      'searchTerm': 'chicken noodle',
+      'icon': Icons.local_fire_department_rounded,
+    },
+    {
+      'name': 'Chicken Fried Rice',
+      'searchTerm': 'chicken fried rice',
+      'icon': Icons.local_fire_department_rounded,
+    },
+    {
+      'name': 'Parotta',
+      'searchTerm': 'parotta',
+      'icon': Icons.local_fire_department_rounded,
+    },
+    {
+      'name': 'Chicken Biriyani',
+      'searchTerm': 'chicken biriyani',
+      'icon': Icons.local_fire_department_rounded,
+    },
+  ];
 
   @override
   void initState() {
@@ -52,10 +79,29 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     
     // Listen to search changes
     _model.textController?.addListener(_onSearchChanged);
+
+    _scrollController = ScrollController();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (_showPopularOrders) {
+          setState(() => _showPopularOrders = false);
+        }
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward &&
+          _scrollController.position.pixels <= 50) {
+        if (!_showPopularOrders) {
+          setState(() => _showPopularOrders = true);
+        }
+      }
+    });
+
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _menuManager.removeListener(_onMenuUpdated);
     _model.textController?.removeListener(_onSearchChanged);
     _model.dispose();
@@ -79,8 +125,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     List<MenuItem> items = _menuManager.activeMenuItems;
     
     // Apply category filter
-      if (_selectedCategory == 'Breakfast') {
-    items = _menuManager.breakfastItems;
+    if (_selectedCategory == 'Breakfast') {
+      items = _menuManager.breakfastItems;
     } else if (_selectedCategory == 'Lunch') {
       items = _menuManager.lunchItems;
     } else if (_selectedCategory != 'All') {
@@ -101,44 +147,64 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     });
   }
 
-  //sort items
+  // Helper method to find menu item by name or search term
+  MenuItem? _findMenuItemByName(String searchTerm) {
+    final term = searchTerm.toLowerCase();
+    return _menuManager.activeMenuItems.firstWhere(
+      (item) => item.name.toLowerCase().contains(term),
+      orElse: () => MenuItem(
+        id: '',
+        name: '',
+        description: '',
+        price: 0,
+        category: '',
+        isVeg: false,
+        isAvailable: false,
+        isActive: false,
+        quantity: '',
+        imageUrl: '',
+      ),
+    );
+  }
+
+  // Sort items
   List<MenuItem> _filterByCategory(String category) {
-  return _menuManager.activeMenuItems.where((item) {
-    final name = item.name.toLowerCase();
-    final desc = item.description.toLowerCase();
+    return _menuManager.activeMenuItems.where((item) {
+      final name = item.name.toLowerCase();
+      final desc = item.description.toLowerCase();
 
-    switch (category) {
-      case 'Dosa':
-        return name.contains('dosa');
+      switch (category) {
+        case 'Dosa':
+          return name.contains('dosa');
 
-      case 'Rice Items':
-        return name.contains('rice') ||
-               name.contains('meals') ||
-               name.contains('biryani');
+        case 'Rice Items':
+          return name.contains('rice') ||
+                 name.contains('meals') ||
+                 name.contains('biryani');
 
-      case 'Fried Rice & Noodles':
-        return name.contains('fried') ||
-               name.contains('noodle');
+        case 'Fried Rice & Noodles':
+          return name.contains('fried') ||
+                 name.contains('noodle');
 
-      case 'Parotta & Kothu':
-        return name.contains('parotta') ||
-               name.contains('paratha') ||
-               name.contains('kothu');
+        case 'Parotta & Kothu':
+          return name.contains('parotta') ||
+                 name.contains('paratha') ||
+                 name.contains('kothu');
 
-      case 'Chicken':
-        return name.contains('chicken');
+        case 'Chicken':
+          return name.contains('chicken');
 
-      case 'Egg':
-        return name.contains('egg') ||
-              name.contains('omelette') ||
-              name.contains('omblet') ||
-              name.contains('kalaki');
+        case 'Egg':
+          return name.contains('egg') ||
+                name.contains('omelette') ||
+                name.contains('omblet') ||
+                name.contains('kalaki');
 
-      default:
-        return false;
-    }
-  }).toList();
-}
+        default:
+          return false;
+      }
+    }).toList();
+  }
 
   void _updateTotalAmount() {
     double total = 0.0;
@@ -194,76 +260,76 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   }
 
   Future<void> _onGenerateBillPressed() async {
-  void showSnack(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    void showSnack(String message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+
+    if (_cartItems.isEmpty) {
+      showSnack('Cart is empty');
+      return;
+    }
+
+    final now = DateTime.now();
+    final billItems = <BillItem>[];
+    double totalAmount = 0.0;
+
+    for (final entry in _cartItems.entries) {
+      final itemId = entry.key;
+      final qty = entry.value;
+      if (qty <= 0) continue;
+
+      final menuItem = _menuManager.allMenuItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () => MenuItem.fromData(
+          name: 'Unknown',
+          price: 0,
+          quantity: '0',
+          category: 'unknown',
+        ),
+      );
+
+      final unitPrice = menuItem.price;
+      final lineTotal = unitPrice * qty;
+      totalAmount += lineTotal;
+
+      billItems.add(
+        BillItem(
+          itemId: itemId,
+          itemNameSnapshot: menuItem.name,
+          unitPriceSnapshot: unitPrice,
+          qty: qty,
+          lineTotal: lineTotal,
+        ),
+      );
+    }
+
+    final bill = Bill(
+      id: const Uuid().v4(),
+      createdAt: now,
+      totalAmount: totalAmount,
+      items: billItems,
     );
+
+    bool printedOk = false;
+    try {
+      printedOk = await ThermalPrinterService.instance.printBill(bill);
+    } catch (e) {
+      printedOk = false;
+    }
+
+    if (printedOk) {
+      await const BillRepository().addBill(bill);
+      showSnack('Bill printed & saved');
+      _clearCart();
+    } else {
+      showSnack(
+        'Printing failed: ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
+      );
+    }
   }
-
-  if (_cartItems.isEmpty) {
-    showSnack('Cart is empty');
-    return;
-  }
-
-  final now = DateTime.now();
-  final billItems = <BillItem>[];
-  double totalAmount = 0.0;
-
-  for (final entry in _cartItems.entries) {
-    final itemId = entry.key;
-    final qty = entry.value;
-    if (qty <= 0) continue;
-
-    final menuItem = _menuManager.allMenuItems.firstWhere(
-      (item) => item.id == itemId,
-      orElse: () => MenuItem.fromData(
-        name: 'Unknown',
-        price: 0,
-        quantity: '0',
-        category: 'unknown',
-      ),
-    );
-
-    final unitPrice = menuItem.price;
-    final lineTotal = unitPrice * qty;
-    totalAmount += lineTotal;
-
-    billItems.add(
-      BillItem(
-        itemId: itemId,
-        itemNameSnapshot: menuItem.name,
-        unitPriceSnapshot: unitPrice,
-        qty: qty,
-        lineTotal: lineTotal,
-      ),
-    );
-  }
-
-  final bill = Bill(
-    id: const Uuid().v4(),
-    createdAt: now,
-    totalAmount: totalAmount,
-    items: billItems,
-  );
-
-  bool printedOk = false;
-  try {
-    printedOk = await ThermalPrinterService.instance.printBill(bill);
-  } catch (e) {
-    printedOk = false;
-  }
-
-  if (printedOk) {
-    await const BillRepository().addBill(bill);
-    showSnack('Bill printed & saved');
-    _clearCart();
-  } else {
-    showSnack(
-      'Printing failed: ${ThermalPrinterService.instance.lastErrorMessage ?? 'Printer not connected'}',
-    );
-  }
-}
 
   void _toggleSummaryPanel() {
     setState(() {
@@ -285,7 +351,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            // MAIN CONTENT (unchanged)
+            // MAIN CONTENT
             Column(
               children: [
                 // Custom App Bar
@@ -413,46 +479,89 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 ),
 
                 // Categories Filter
-               // Categories Filter (2-row layout)
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
-                          _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
-                          _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
-                          _buildCategoryChip('Dosa', isSelected: _selectedCategory == 'Dosa'),
-                          _buildCategoryChip('Rice Items', isSelected: _selectedCategory == 'Rice Items'),
-                        ],
-                      ),
-
-                      SizedBox(height: 8),
-
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildCategoryChip(
-                            'Fried Rice & Noodles',
-                            isSelected: _selectedCategory == 'Fried Rice & Noodles',
-                          ),
-                          _buildCategoryChip(
-                            'Parotta & Kothu',
-                            isSelected: _selectedCategory == 'Parotta & Kothu',
-                          ),
-                          _buildCategoryChip('Chicken', isSelected: _selectedCategory == 'Chicken'),
-                          _buildCategoryChip('Egg', isSelected: _selectedCategory == 'Egg'),
-                        ],
-                      ),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: SizedBox(
+                    height: 140, 
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
+                        _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
+                        _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
+                        _buildCategoryChip('Dosa', isSelected: _selectedCategory == 'Dosa'),
+                        _buildCategoryChip('Rice Items', isSelected: _selectedCategory == 'Rice Items'),
+                        _buildCategoryChip('Fried Rice & Noodles',
+                            isSelected: _selectedCategory == 'Fried Rice & Noodles'),
+                        _buildCategoryChip('Parotta & Kothu',
+                            isSelected: _selectedCategory == 'Parotta & Kothu'),
+                        _buildCategoryChip('Chicken', isSelected: _selectedCategory == 'Chicken'),
+                        _buildCategoryChip('Egg', isSelected: _selectedCategory == 'Egg'),
+                      ],
+                    ),
                   ),
                 ),
 
+                // Popular Orders Section
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: AnimatedSlide(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOut,
+                    offset: _showPopularOrders ? Offset.zero : const Offset(0, -0.15),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: _showPopularOrders ? 1.0 : 0.0,
+                      child: _showPopularOrders
+                          ? Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 12),
+                                    child: Text(
+                                      'Popular Orders',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF333333),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 130,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: BouncingScrollPhysics(),
+                                      itemCount: _popularItems.length,
+                                      itemBuilder: (context, index) {
+                                        final popularItem = _popularItems[index];
+                                        final menuItem =
+                                            _findMenuItemByName(popularItem['searchTerm']);
+
+                                        if (menuItem?.id.isEmpty ?? true) {
+                                          return const SizedBox.shrink();
+                                        }
+
+                                        return _buildPopularItemCard(
+                                          name: popularItem['name'],
+                                          icon: popularItem['icon'],
+                                          menuItem: menuItem!,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
 
                 // Items Count Header
                 Padding(
@@ -523,7 +632,9 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             ),
                           )
                         : ListView.builder(
+                            controller: _scrollController,
                             physics: BouncingScrollPhysics(),
+                            padding: EdgeInsets.zero,
                             itemCount: _filteredItems.length,
                             itemBuilder: (context, index) {
                               final item = _filteredItems[index];
@@ -572,6 +683,89 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // NEW: Build Popular Item Card
+  Widget _buildPopularItemCard({
+    required String name,
+    required IconData icon,
+    required MenuItem menuItem,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        if (menuItem.isAvailable && menuItem.isActive) {
+          _addToCart(menuItem.id);
+        }
+      },
+      child: Container(
+        width: 120,
+        margin: EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+          border: Border.all(
+            color: Color(0xFFEEEEEE),
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon
+              Container(
+                width: 32,
+                height: 32,
+                margin: EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Color(0xFFE59737).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: Color(0xFFE59737),
+                    size: 18,
+                  ),
+                ),
+              ),
+              
+              // Item Name
+              Text(
+                name,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              // Price
+              SizedBox(height: 4),
+              Text(
+                '₹${menuItem.price.toStringAsFixed(2)}',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFE59737),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -895,7 +1089,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     );
   }
 
-  // NEW: Small Floating Summary Card
+  // Small Floating Summary Card
   Widget _buildSmallSummaryCard() {
     final totalItems = _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
     

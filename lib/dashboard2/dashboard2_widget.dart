@@ -9,7 +9,6 @@ import '../order/order_widget.dart';
 import '/revenue/revenue_widget.dart';
 import '../pages/printer_settings_page.dart';
 
-/// Staff Portal Dashboard
 class Dashboard2Widget extends StatefulWidget {
   const Dashboard2Widget({super.key});
 
@@ -63,25 +62,49 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                     ),
                   ],
                 ),
-                padding: EdgeInsetsDirectional.fromSTEB(24, 16, 24, 24),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Abiruchi Food Works',
-                          style: GoogleFonts.inter(
-                            color: Color(0xFF333333),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
+                    //LOGO
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFF4CAF50),
+                          width: 2,
                         ),
-                      ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Image.asset(
+                          'assets/images/shop_logo.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    Expanded(
+                      child: Text(
+                        'Abiruchi Food Works',
+                        style: GoogleFonts.inter(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF333333),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
               ),
+
 
               // ================= DASHBOARD GRID =================
               Expanded(
@@ -91,29 +114,12 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Quick Actions',
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Select an option to continue',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                      SizedBox(height: 32),
                       Expanded(
                         child: GridView.count(
                           crossAxisCount: 2,
                           crossAxisSpacing: 20,
                           mainAxisSpacing: 20,
+                          childAspectRatio: 0.8, 
                           physics: BouncingScrollPhysics(),
                           children: [
                             _buildActionCard(
@@ -234,15 +240,15 @@ class _Dashboard2WidgetState extends State<Dashboard2Widget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(icon, color: color, size: 28),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
               Text(
                 title,
                 textAlign: TextAlign.center,
