@@ -481,7 +481,7 @@ class ThermalPrinterService {
         bold: true,
         fontType: PosFontType.fontB,
         height: PosTextSize.size2,
-        width: PosTextSize.size2,
+        width: PosTextSize.size1,
       ),
       linesAfter: 1,
     ));

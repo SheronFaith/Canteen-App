@@ -16,9 +16,8 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
       styles: const PosStyles(
         align: PosAlign.center,
         bold: true,
-        fontType: PosFontType.fontB,
-        height: PosTextSize.size2,
-        width: PosTextSize.size2,
+        height: PosTextSize.size1,
+        width: PosTextSize.size1,
       ),
       linesAfter: 1,
     ),
@@ -47,14 +46,20 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
               width: 8,
               styles: const PosStyles(
                 align: PosAlign.left,
+                bold: false,
                 fontType: PosFontType.fontB,
+                height: PosTextSize.size1,
+                width: PosTextSize.size1,
               )),
           PosColumn(
               text: total,
               width: 4,
               styles: const PosStyles(
                 align: PosAlign.right,
+                bold: false,
                 fontType: PosFontType.fontB,
+                height: PosTextSize.size1,
+                width: PosTextSize.size1,
               )),
         ],
       ),
@@ -80,9 +85,11 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
     ),
   );
 
-  bytes.addAll(generator.feed(1));
-
-  bytes.addAll(generator.cut());
+  // Bottom margin so the paper comes out enough to tear.
+  // Using ESC/POS "Print and feed n dots" (ESC J n) gives finer control than
+  // feeding a whole text line.
+  // ~80 dots ≈ ~10mm on most 203dpi printers.
+  bytes.addAll(<int>[0x1B, 0x4A, 80]);
 
   return Uint8List.fromList(bytes);
 }

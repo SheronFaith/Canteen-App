@@ -70,13 +70,13 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     _model = createModel(context, () => CreateBillModel());
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
-    
+
     // Initialize with all active items
     _filteredItems = _menuManager.activeMenuItems;
-    
+
     // Listen for menu updates
     _menuManager.addListener(_onMenuUpdated);
-    
+
     // Listen to search changes
     _model.textController?.addListener(_onSearchChanged);
 
@@ -121,9 +121,9 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   void _applyFilters() {
     final searchQuery = _model.textController.text.toLowerCase();
-    
+
     List<MenuItem> items = _menuManager.activeMenuItems;
-    
+
     // Apply category filter
     if (_selectedCategory == 'Breakfast') {
       items = _menuManager.breakfastItems;
@@ -132,16 +132,17 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     } else if (_selectedCategory != 'All') {
       items = _filterByCategory(_selectedCategory);
     }
-    
+
     // Apply search filter
     if (searchQuery.isNotEmpty) {
-      items = items.where((item) =>
-          item.name.toLowerCase().contains(searchQuery) ||
-          item.description.toLowerCase().contains(searchQuery) ||
-          item.category.toLowerCase().contains(searchQuery)
-      ).toList();
+      items = items
+          .where((item) =>
+              item.name.toLowerCase().contains(searchQuery) ||
+              item.description.toLowerCase().contains(searchQuery) ||
+              item.category.toLowerCase().contains(searchQuery))
+          .toList();
     }
-    
+
     setState(() {
       _filteredItems = items;
     });
@@ -340,7 +341,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -578,7 +579,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: Color(0xFFE8F5E9),
                           borderRadius: BorderRadius.circular(20),
@@ -599,7 +601,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 // Menu Items List
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(16,0,16,_cartItems.isNotEmpty ? 80 : 0,),
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      16,
+                      0,
+                      16,
+                      _cartItems.isNotEmpty ? 80 : 0,
+                    ),
                     child: _filteredItems.isEmpty
                         ? Center(
                             child: Column(
@@ -873,9 +880,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: item.isVeg ? Color(0xFF4CAF50) : Color(0xFFF44336),
+                          color: item.isVeg
+                              ? Color(0xFF4CAF50)
+                              : Color(0xFFF44336),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -1002,7 +1012,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
                                       '$quantity',
                                       style: GoogleFonts.inter(
@@ -1091,8 +1102,9 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   // Small Floating Summary Card
   Widget _buildSmallSummaryCard() {
-    final totalItems = _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
-    
+    final totalItems =
+        _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1129,7 +1141,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ),
             ),
             SizedBox(width: 12),
-            
+
             // Summary Text
             Expanded(
               child: Column(
@@ -1155,7 +1167,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 ],
               ),
             ),
-            
+
             // View Details Button
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1192,7 +1204,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   Widget _buildFullSummaryPanel() {
     final cartItemsList = _cartItems.entries.toList();
     final totalItems = cartItemsList.fold(0, (sum, entry) => sum + entry.value);
-    
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -1222,7 +1234,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                     ),
                   ),
                 ),
-                
+
                 // Close Button
                 GestureDetector(
                   onTap: _toggleSummaryPanel,
@@ -1246,7 +1258,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ],
             ),
           ),
-          
+
           // Header
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -1279,11 +1291,11 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
               ],
             ),
           ),
-          
+
           // Items List
           Expanded(
             child: Padding(
-            padding: EdgeInsets.fromLTRB(24, 12, 24, 0),
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 0),
               child: cartItemsList.isEmpty
                   ? Center(
                       child: Column(
@@ -1324,7 +1336,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             category: 'unknown',
                           ),
                         );
-                        
+
                         return Row(
                           children: [
                             // Item Info
@@ -1355,7 +1367,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                               ),
                             ),
                             SizedBox(width: 16),
-                            
+
                             // Quantity Controls
                             Container(
                               height: 36,
@@ -1384,10 +1396,11 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Quantity
                                   Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
                                       '${entry.value}',
                                       style: GoogleFonts.inter(
@@ -1397,7 +1410,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Plus Button
                                   GestureDetector(
                                     onTap: () => _addToCart(item.id),
@@ -1421,7 +1434,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                               ),
                             ),
                             SizedBox(width: 16),
-                            
+
                             // Remove Button
                             GestureDetector(
                               onTap: () => _removeItemCompletely(item.id),
@@ -1445,28 +1458,28 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                 ),
                               ),
                             ),
-                            
+
                             // Item Total
                             SizedBox(width: 16),
                             SizedBox(
-                            width: 80,
-                            child: Text(
-                              '₹${(item.price * entry.value).toStringAsFixed(2)}',
-                              textAlign: TextAlign.right,
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF333333),
+                              width: 80,
+                              child: Text(
+                                '₹${(item.price * entry.value).toStringAsFixed(2)}',
+                                textAlign: TextAlign.right,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF333333),
+                                ),
                               ),
                             ),
-                          ),
                           ],
                         );
                       },
                     ),
             ),
           ),
-          
+
           // Total & Actions
           Container(
             decoration: BoxDecoration(
@@ -1501,7 +1514,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                   ],
                 ),
                 SizedBox(height: 24),
-                
+
                 // Action Buttons
                 Row(
                   children: [
@@ -1535,15 +1548,15 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       ),
                     ),
                     SizedBox(width: 16),
-                    
+
                     // Generate Bill Button
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                       onTap: () async {
-                        _toggleSummaryPanel();
-                        await _onGenerateBillPressed();
-                      },
+                        onTap: () async {
+                          _toggleSummaryPanel();
+                          await _onGenerateBillPressed();
+                        },
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(
