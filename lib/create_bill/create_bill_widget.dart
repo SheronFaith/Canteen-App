@@ -26,7 +26,6 @@ class CreateBillWidget extends StatefulWidget {
 }
 
 class _CreateBillWidgetState extends State<CreateBillWidget> {
-
   late ScrollController _scrollController;
   bool _showPopularOrders = true;
 
@@ -58,8 +57,8 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
       'icon': Icons.local_fire_department_rounded,
     },
     {
-      'name': 'Chicken Biriyani',
-      'searchTerm': 'chicken biriyani',
+      'name': 'Chicken Biryani (with Egg/Raita/Brinjal)',
+      'searchTerm': 'chicken biryani',
       'icon': Icons.local_fire_department_rounded,
     },
   ];
@@ -89,14 +88,13 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
           setState(() => _showPopularOrders = false);
         }
       } else if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward &&
+              ScrollDirection.forward &&
           _scrollController.position.pixels <= 50) {
         if (!_showPopularOrders) {
           setState(() => _showPopularOrders = true);
         }
       }
     });
-
   }
 
   @override
@@ -180,26 +178,25 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
         case 'Rice Items':
           return name.contains('rice') ||
-                 name.contains('meals') ||
-                 name.contains('biryani');
+              name.contains('meals') ||
+              name.contains('biryani');
 
         case 'Fried Rice & Noodles':
-          return name.contains('fried') ||
-                 name.contains('noodle');
+          return name.contains('fried') || name.contains('noodle');
 
         case 'Parotta & Kothu':
           return name.contains('parotta') ||
-                 name.contains('paratha') ||
-                 name.contains('kothu');
+              name.contains('paratha') ||
+              name.contains('kothu');
 
         case 'Chicken':
           return name.contains('chicken');
 
         case 'Egg':
           return name.contains('egg') ||
-                name.contains('omelette') ||
-                name.contains('omblet') ||
-                name.contains('kalaki');
+              name.contains('omelette') ||
+              name.contains('omblet') ||
+              name.contains('kalaki');
 
         default:
           return false;
@@ -483,22 +480,30 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                   child: SizedBox(
-                    height: 140, 
+                    height: 140,
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        _buildCategoryChip('All', isSelected: _selectedCategory == 'All'),
-                        _buildCategoryChip('Breakfast', isSelected: _selectedCategory == 'Breakfast'),
-                        _buildCategoryChip('Lunch', isSelected: _selectedCategory == 'Lunch'),
-                        _buildCategoryChip('Dosa', isSelected: _selectedCategory == 'Dosa'),
-                        _buildCategoryChip('Rice Items', isSelected: _selectedCategory == 'Rice Items'),
+                        _buildCategoryChip('All',
+                            isSelected: _selectedCategory == 'All'),
+                        _buildCategoryChip('Breakfast',
+                            isSelected: _selectedCategory == 'Breakfast'),
+                        _buildCategoryChip('Lunch',
+                            isSelected: _selectedCategory == 'Lunch'),
+                        _buildCategoryChip('Dosa',
+                            isSelected: _selectedCategory == 'Dosa'),
+                        _buildCategoryChip('Rice Items',
+                            isSelected: _selectedCategory == 'Rice Items'),
                         _buildCategoryChip('Fried Rice & Noodles',
-                            isSelected: _selectedCategory == 'Fried Rice & Noodles'),
+                            isSelected:
+                                _selectedCategory == 'Fried Rice & Noodles'),
                         _buildCategoryChip('Parotta & Kothu',
                             isSelected: _selectedCategory == 'Parotta & Kothu'),
-                        _buildCategoryChip('Chicken', isSelected: _selectedCategory == 'Chicken'),
-                        _buildCategoryChip('Egg', isSelected: _selectedCategory == 'Egg'),
+                        _buildCategoryChip('Chicken',
+                            isSelected: _selectedCategory == 'Chicken'),
+                        _buildCategoryChip('Egg',
+                            isSelected: _selectedCategory == 'Egg'),
                       ],
                     ),
                   ),
@@ -512,13 +517,16 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                   child: AnimatedSlide(
                     duration: const Duration(milliseconds: 220),
                     curve: Curves.easeOut,
-                    offset: _showPopularOrders ? Offset.zero : const Offset(0, -0.15),
+                    offset: _showPopularOrders
+                        ? Offset.zero
+                        : const Offset(0, -0.15),
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: _showPopularOrders ? 1.0 : 0.0,
                       child: _showPopularOrders
                           ? Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -540,9 +548,10 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       physics: BouncingScrollPhysics(),
                                       itemCount: _popularItems.length,
                                       itemBuilder: (context, index) {
-                                        final popularItem = _popularItems[index];
-                                        final menuItem =
-                                            _findMenuItemByName(popularItem['searchTerm']);
+                                        final popularItem =
+                                            _popularItems[index];
+                                        final menuItem = _findMenuItemByName(
+                                            popularItem['searchTerm']);
 
                                         if (menuItem?.id.isEmpty ?? true) {
                                           return const SizedBox.shrink();
@@ -748,7 +757,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                   ),
                 ),
               ),
-              
+
               // Item Name
               Text(
                 name,
@@ -760,7 +769,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              
+
               // Price
               SizedBox(height: 4),
               Text(
@@ -1338,6 +1347,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                         );
 
                         return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Item Info
                             Expanded(
@@ -1351,8 +1361,6 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF333333),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   SizedBox(height: 4),
                                   Text(
