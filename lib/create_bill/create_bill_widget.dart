@@ -304,11 +304,14 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
       );
     }
 
+    final billNo = const BillRepository().getNextBillNo(now);
+
     final bill = Bill(
       id: const Uuid().v4(),
       createdAt: now,
       totalAmount: totalAmount,
       items: billItems,
+      billNo: billNo,
     );
 
     bool printedOk = false;
