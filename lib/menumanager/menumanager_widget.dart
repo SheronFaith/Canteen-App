@@ -19,6 +19,7 @@ class MenumanagerWidget extends StatefulWidget {
 }
 
 class _MenumanagerWidgetState extends State<MenumanagerWidget> {
+
   late MenumanagerModel _model;
   final MenuManager _menuManager = MenuManager();
   List<MenuItem> _filteredItems = [];

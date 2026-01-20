@@ -67,26 +67,42 @@ class _MyAppState extends State<MyApp> {
       });
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Canteen',
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en', '')],
-      theme: ThemeData(
-        brightness: Brightness.light,
-        useMaterial3: false,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: false,
-      ),
-      themeMode: _themeMode,
-      routerConfig: _router,
-    );
-  }
+Widget build(BuildContext context) {
+  return MaterialApp.router(
+    debugShowCheckedModeBanner: false,
+    title: 'Canteen',
+
+    //FIX FOR OXYGEN OS FONT SCALING
+    builder: (context, child) {
+      final mediaQuery = MediaQuery.of(context);
+      return MediaQuery(
+        data: mediaQuery.copyWith(
+          textScaleFactor:
+              mediaQuery.textScaleFactor.clamp(1.0, 1.1),
+        ),
+        child: child!,
+      );
+    },
+
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: const [
+      Locale('en', ''),
+    ],
+
+    theme: ThemeData(
+      brightness: Brightness.light,
+      useMaterial3: false,
+    ),
+    darkTheme: ThemeData(
+      brightness: Brightness.dark,
+      useMaterial3: false,
+    ),
+    themeMode: _themeMode,
+    routerConfig: _router,
+  );
+}
 }

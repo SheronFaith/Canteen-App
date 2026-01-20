@@ -57,106 +57,126 @@ class _RevenueWidgetState extends State<RevenueWidget> {
           body: Column(
             children: [
               // Custom Header
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            FlutterFlowIconButton(
-                              borderRadius: 12,
-                              buttonSize: 40,
-                              icon: Icon(
-                                Icons.arrow_back_ios_rounded,
-                                color: Color(0xFF333333),
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Revenue',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF333333),
-                                    ),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    anchorLabel == null
-                                        ? 'Sales performance overview'
-                                        : 'Based on $anchorLabel',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xFF666666),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                final now = DateTime.now();
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: _anchorDate ?? now,
-                                  firstDate: DateTime(2020, 1, 1),
-                                  lastDate: DateTime(now.year + 1, 12, 31),
-                                );
-                                if (picked == null) return;
-                                setState(() {
-                                  _anchorDate = picked;
-                                  if (_selectedPeriod == 'Months') {
-                                    _selectedPeriod = 'This Month';
-                                  }
-                                });
-                              },
-                              onLongPress: () {
-                                setState(() {
-                                  _anchorDate = null;
-                                });
-                              },
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF8F9FA),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.calendar_today_outlined,
-                                  color: Color(0xFF666666),
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+Container(
+  decoration: BoxDecoration(
+    color: Colors.white,
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.05),
+        blurRadius: 10,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  child: SafeArea(
+    child: Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+      child: Row(
+        children: [
+          FlutterFlowIconButton(
+            borderRadius: 12,
+            buttonSize: 40,
+            icon: Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Color(0xFF333333),
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Revenue',
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF333333),
                   ),
                 ),
+                SizedBox(height: 2),
+                Text(
+                  anchorLabel == null
+                      ? 'Sales performance overview'
+                      : 'Based on $anchorLabel',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF666666),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Calendar button
+          GestureDetector(
+            onTap: () async {
+              final now = DateTime.now();
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _anchorDate ?? now,
+                firstDate: DateTime(2020, 1, 1),
+                lastDate: DateTime(now.year + 1, 12, 31),
+              );
+              if (picked == null) return;
+              setState(() {
+                _anchorDate = picked;
+                if (_selectedPeriod == 'Months') {
+                  _selectedPeriod = 'This Month';
+                }
+              });
+            },
+            onLongPress: () {
+              setState(() {
+                _anchorDate = null;
+              });
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Icon(
+                Icons.calendar_today_outlined,
+                color: Color(0xFF666666),
+                size: 20,
+              ),
+            ),
+          ),
+
+          SizedBox(width: 8),
+
+          // Clear records button
+          GestureDetector(
+            onTap: () => _clearAllRecords(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.red,
+                size: 22,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+
 
               // Period Selector
               Padding(
@@ -322,6 +342,58 @@ class _RevenueWidgetState extends State<RevenueWidget> {
         return periodKey;
     }
   }
+
+  Future<void> _clearAllRecords(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        'Clear All Records',
+        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+      ),
+      content: Text(
+        'This will permanently delete all revenue and sales records. This action cannot be undone.',
+        style: GoogleFonts.inter(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(
+            'Cancel',
+            style: GoogleFonts.inter(color: Colors.grey),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+          ),
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(
+            'Clear',
+            style: GoogleFonts.inter(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) {
+    final billsBox = Hive.box<Bill>(BillRepository.billsBoxName);
+    await billsBox.clear();
+
+    setState(() {
+      _anchorDate = null;
+      _selectedPeriod = 'Today';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('All records cleared'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
 
   Widget _buildPeriodTab(String label, int index) {
     bool isSelected = _selectedPeriod == label;

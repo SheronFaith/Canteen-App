@@ -26,13 +26,15 @@ class CreateBillWidget extends StatefulWidget {
 }
 
 class _CreateBillWidgetState extends State<CreateBillWidget> {
+  String? _blinkMenuItemId;
+  String? _blinkPopularItemId;
   late ScrollController _scrollController;
   bool _showPopularOrders = true;
 
   late CreateBillModel _model;
   final MenuManager _menuManager = MenuManager();
   List<MenuItem> _filteredItems = [];
-  String _selectedCategory = 'All';
+  String? _selectedCategory; // null = default menu
   final Map<String, int> _cartItems = {}; // itemId -> quantity
   double _totalAmount = 0.0;
   bool _showFullSummary = false;
@@ -57,7 +59,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
       'icon': Icons.local_fire_department_rounded,
     },
     {
-      'name': 'Chicken Biryani (with Egg/Raita/Brinjal)',
+      'name': 'Chicken Biryani',
       'searchTerm': 'chicken biryani',
       'icon': Icons.local_fire_department_rounded,
     },
@@ -71,7 +73,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     _model.textFieldFocusNode ??= FocusNode();
 
     // Initialize with all active items
-    _filteredItems = _menuManager.activeMenuItems;
+    _filteredItems = _menuManager.defaultMenuItems;
 
     // Listen for menu updates
     _menuManager.addListener(_onMenuUpdated);
@@ -118,33 +120,34 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   }
 
   void _applyFilters() {
-    final searchQuery = _model.textController.text.toLowerCase();
+  final searchQuery = _model.textController.text.toLowerCase();
+  List<MenuItem> items;
 
-    List<MenuItem> items = _menuManager.activeMenuItems;
-
-    // Apply category filter
-    if (_selectedCategory == 'Breakfast') {
-      items = _menuManager.breakfastItems;
-    } else if (_selectedCategory == 'Lunch') {
-      items = _menuManager.lunchItems;
-    } else if (_selectedCategory != 'All') {
-      items = _filterByCategory(_selectedCategory);
-    }
-
-    // Apply search filter
-    if (searchQuery.isNotEmpty) {
-      items = items
-          .where((item) =>
-              item.name.toLowerCase().contains(searchQuery) ||
-              item.description.toLowerCase().contains(searchQuery) ||
-              item.category.toLowerCase().contains(searchQuery))
-          .toList();
-    }
-
-    setState(() {
-      _filteredItems = items;
-    });
+  // DEFAULT VIEW (app open)
+  if (_selectedCategory == null) {
+    items = _menuManager.defaultMenuItems;
   }
+  // ALL
+  else if (_selectedCategory == 'All') {
+    items = _menuManager.activeMenuItems;
+  }
+  // CATEGORY
+  else {
+    items = _menuManager.getByCategory(_selectedCategory!);
+  }
+
+  // SEARCH
+  if (searchQuery.isNotEmpty) {
+    items = items.where((item) {
+      return item.name.toLowerCase().contains(searchQuery) ||
+          item.description.toLowerCase().contains(searchQuery);
+    }).toList();
+  }
+
+  setState(() {
+    _filteredItems = items;
+  });
+}
 
   // Helper method to find menu item by name or search term
   MenuItem? _findMenuItemByName(String searchTerm) {
@@ -164,44 +167,6 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
         imageUrl: '',
       ),
     );
-  }
-
-  // Sort items
-  List<MenuItem> _filterByCategory(String category) {
-    return _menuManager.activeMenuItems.where((item) {
-      final name = item.name.toLowerCase();
-      final desc = item.description.toLowerCase();
-
-      switch (category) {
-        case 'Dosa':
-          return name.contains('dosa');
-
-        case 'Rice Items':
-          return name.contains('rice') ||
-              name.contains('meals') ||
-              name.contains('biryani');
-
-        case 'Fried Rice & Noodles':
-          return name.contains('fried') || name.contains('noodle');
-
-        case 'Parotta & Kothu':
-          return name.contains('parotta') ||
-              name.contains('paratha') ||
-              name.contains('kothu');
-
-        case 'Chicken':
-          return name.contains('chicken');
-
-        case 'Egg':
-          return name.contains('egg') ||
-              name.contains('omelette') ||
-              name.contains('omblet') ||
-              name.contains('kalaki');
-
-        default:
-          return false;
-      }
-    }).toList();
   }
 
   void _updateTotalAmount() {
@@ -352,19 +317,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
             // MAIN CONTENT
             Column(
               children: [
-                // Custom App Bar
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
+                    SafeArea(
                     child: Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
                       child: Row(
@@ -382,30 +335,37 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             },
                           ),
                           SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Create Bill',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF333333),
-                                  ),
+                         Expanded(
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: TextFormField(
+                              controller: _model.textController,
+                              focusNode: _model.textFieldFocusNode,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Color(0xFF333333),
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Search menu items',
+                                hintStyle: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: Color(0xFF999999),
                                 ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Add items to generate invoice',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF666666),
-                                  ),
+                                border: InputBorder.none,
+                                prefixIcon: Icon(
+                                  Icons.search_rounded,
+                                  color: Color(0xFF999999),
+                                  size: 20,
                                 ),
-                              ],
+                                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                              ),
                             ),
                           ),
+                        ),
                           Container(
                             height: 36,
                             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -427,87 +387,34 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                         ],
                       ),
                     ),
-                  ),
-                ),
-
-                // Search Bar
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16, 16, 16, 12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFFF8F9FA),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextFormField(
-                      controller: _model.textController,
-                      focusNode: _model.textFieldFocusNode,
-                      autofocus: false,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF333333),
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Search menu items (e.g., Dosa, Biryani)',
-                        hintStyle: GoogleFonts.inter(
-                          color: Color(0xFF999999),
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(left: 16, right: 8),
-                          child: Icon(
-                            Icons.search_rounded,
-                            color: Color(0xFF999999),
-                            size: 20,
-                          ),
-                        ),
-                        prefixIconConstraints: BoxConstraints(minWidth: 40),
-                        contentPadding: EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ),
                 ),
 
                 // Categories Filter
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: SizedBox(
-                    height: 140,
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _buildCategoryChip('All',
-                            isSelected: _selectedCategory == 'All'),
-                        _buildCategoryChip('Breakfast',
-                            isSelected: _selectedCategory == 'Breakfast'),
-                        _buildCategoryChip('Lunch',
-                            isSelected: _selectedCategory == 'Lunch'),
-                        _buildCategoryChip('Dosa',
-                            isSelected: _selectedCategory == 'Dosa'),
-                        _buildCategoryChip('Rice Items',
-                            isSelected: _selectedCategory == 'Rice Items'),
-                        _buildCategoryChip('Fried Rice & Noodles',
-                            isSelected:
-                                _selectedCategory == 'Fried Rice & Noodles'),
-                        _buildCategoryChip('Parotta & Kothu',
-                            isSelected: _selectedCategory == 'Parotta & Kothu'),
-                        _buildCategoryChip('Chicken',
-                            isSelected: _selectedCategory == 'Chicken'),
-                        _buildCategoryChip('Egg',
-                            isSelected: _selectedCategory == 'Egg'),
-                      ],
-                    ),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), // 🔽 reduced
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildCategoryChip('All',
+                          isSelected: _selectedCategory == 'All'),
+                      _buildCategoryChip('Breakfast',
+                          isSelected: _selectedCategory == 'Breakfast'),
+                      _buildCategoryChip('Meals',
+                          isSelected: _selectedCategory == 'Meals'),
+                      _buildCategoryChip('Chicken',
+                          isSelected: _selectedCategory == 'Chicken'),
+                      _buildCategoryChip('Rice & Noodles',
+                          isSelected: _selectedCategory == 'Rice & Noodles'),
+                      _buildCategoryChip('Parotta & Kothu',
+                          isSelected: _selectedCategory == 'Parotta & Kothu'),
+                      _buildCategoryChip('Egg',
+                          isSelected: _selectedCategory == 'Egg'),
+                    ],
                   ),
                 ),
+
+                SizedBox(height: 10),
 
                 // Popular Orders Section
                 AnimatedSize(
@@ -526,7 +433,7 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                       child: _showPopularOrders
                           ? Padding(
                               padding:
-                                  EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
+                                  EdgeInsetsDirectional.fromSTEB(16, 0, 16, 6),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -706,95 +613,122 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
   // NEW: Build Popular Item Card
   Widget _buildPopularItemCard({
-    required String name,
-    required IconData icon,
-    required MenuItem menuItem,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        if (menuItem.isAvailable && menuItem.isActive) {
-          _addToCart(menuItem.id);
+  required String name,
+  required IconData icon,
+  required MenuItem menuItem,
+}) {
+  final bool isBlinking = _blinkPopularItemId == menuItem.id;
+
+  return GestureDetector(
+    onTap: () {
+      if (!menuItem.isAvailable || !menuItem.isActive) return;
+
+      setState(() {
+        _blinkPopularItemId = menuItem.id;
+      });
+
+      _addToCart(menuItem.id);
+
+      // remove blink after short time
+      Future.delayed(const Duration(milliseconds: 180), () {
+        if (mounted) {
+          setState(() {
+            _blinkPopularItemId = null;
+          });
         }
-      },
-      child: Container(
-        width: 120,
-        margin: EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-          border: Border.all(
-            color: Color(0xFFEEEEEE),
-            width: 1,
+      });
+    },
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      width: 120,
+      margin: EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: isBlinking
+            ? Color(0xFFE59737).withOpacity(0.15)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon
-              Container(
-                width: 32,
-                height: 32,
-                margin: EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: Color(0xFFE59737).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    color: Color(0xFFE59737),
-                    size: 18,
-                  ),
-                ),
-              ),
-
-              // Item Name
-              Text(
-                name,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              // Price
-              SizedBox(height: 4),
-              Text(
-                '₹${menuItem.price.toStringAsFixed(2)}',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFE59737),
-                ),
-              ),
-            ],
-          ),
+        ],
+        border: Border.all(
+          color: isBlinking
+              ? Color(0xFFE59737)
+              : Color(0xFFEEEEEE),
+          width: 1,
         ),
       ),
-    );
-  }
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon
+            Container(
+              width: 32,
+              height: 32,
+              margin: EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: Color(0xFFE59737).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: Color(0xFFE59737),
+                  size: 18,
+                ),
+              ),
+            ),
+
+            // Item Name
+            Text(
+              name,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF333333),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            SizedBox(height: 4),
+
+            // Price
+            Text(
+              '₹${menuItem.price.toStringAsFixed(2)}',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFE59737),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   Widget _buildCategoryChip(String label, {required bool isSelected}) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedCategory = label;
-          _applyFilters();
-        });
-      },
+  setState(() {
+    // If same chip clicked again → reset to default
+    if (_selectedCategory == label) {
+      _selectedCategory = null; // back to default menu
+    } else {
+      _selectedCategory = label;
+    }
+    _applyFilters();
+  });
+},
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -965,20 +899,6 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             ),
                         ],
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        '${item.description} • ${item.quantity}',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: (!item.isActive || !item.isAvailable)
-                              ? Color(0xFFCCCCCC)
-                              : Color(0xFF666666),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
