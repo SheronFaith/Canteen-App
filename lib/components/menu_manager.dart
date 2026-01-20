@@ -8,29 +8,28 @@ class MenuManager {
   static final MenuManager _instance = MenuManager._internal();
 
   static const String _disabledMenuItemsKey = 'disabled_menu_items';
-  
+
   factory MenuManager() {
     return _instance;
   }
 
-   MenuManager._internal() {
+  MenuManager._internal() {
     _initializeMenuItems();
     _restoreMenuAvailability();
   }
 
   Future<void> _restoreMenuAvailability() async {
-  final prefs = await SharedPreferences.getInstance();
-  final disabledIds =
-      prefs.getStringList(_disabledMenuItemsKey) ?? [];
+    final prefs = await SharedPreferences.getInstance();
+    final disabledIds = prefs.getStringList(_disabledMenuItemsKey) ?? [];
 
-  for (final item in _allMenuItems) {
-    if (disabledIds.contains(item.id)) {
-      item.isActive = false;
+    for (final item in _allMenuItems) {
+      if (disabledIds.contains(item.id)) {
+        item.isActive = false;
+      }
     }
-  }
 
-  notifyListeners();
-}
+    notifyListeners();
+  }
 
   final List<MenuItem> _allMenuItems = [];
   final List<VoidCallback> _listeners = [];
@@ -61,27 +60,26 @@ class MenuManager {
   }
 
   Future<void> toggleItemAvailability(String itemId, bool isActive) async {
-  final itemIndex = _allMenuItems.indexWhere((item) => item.id == itemId);
-  if (itemIndex == -1) return;
+    final itemIndex = _allMenuItems.indexWhere((item) => item.id == itemId);
+    if (itemIndex == -1) return;
 
-  _allMenuItems[itemIndex].isActive = isActive;
+    _allMenuItems[itemIndex].isActive = isActive;
 
-  final prefs = await SharedPreferences.getInstance();
-  final disabledIds =
-      prefs.getStringList(_disabledMenuItemsKey) ?? [];
+    final prefs = await SharedPreferences.getInstance();
+    final disabledIds = prefs.getStringList(_disabledMenuItemsKey) ?? [];
 
-  if (!isActive) {
-    if (!disabledIds.contains(itemId)) {
-      disabledIds.add(itemId);
+    if (!isActive) {
+      if (!disabledIds.contains(itemId)) {
+        disabledIds.add(itemId);
+      }
+    } else {
+      disabledIds.remove(itemId);
     }
-  } else {
-    disabledIds.remove(itemId);
+
+    await prefs.setStringList(_disabledMenuItemsKey, disabledIds);
+
+    notifyListeners();
   }
-
-  await prefs.setStringList(_disabledMenuItemsKey, disabledIds);
-
-  notifyListeners();
-}
 
   void toggleItemStock(String itemId, bool isAvailable) {
     final itemIndex = _allMenuItems.indexWhere((item) => item.id == itemId);
@@ -92,92 +90,90 @@ class MenuManager {
   }
 
   final List<String> defaultMenuNames = [
-  'Idli',
-  'Masala Dosa',
-  'Podi Dosa',
-  'Plain Dosa',
-  'Egg Dosa',
-  'Onion Dosa',
-  'Pongal',
-  'Poori',
-  'Vada',
-  'Chicken Fried Rice',
-  'Chicken Noodles',
-  'Chicken 65',
-  'Parotta with Kurma',
-  'Egg Kothu Parotta',
-  'Chicken Kothu Parotta',
-  'Sambar Rice',
-  'Curd Rice',
-  'Chicken Biryani',
-  'Chilli Parotta',
-  'Veg Rice',
-  'Veg Noodles',
-  'Gobi Rice',
-  'Gobi Noodles',
-];
+    'Idli',
+    'Masala Dosa',
+    'Podi Dosa',
+    'Plain Dosa',
+    'Egg Dosa',
+    'Onion Dosa',
+    'Pongal',
+    'Poori',
+    'Vada',
+    'Chicken Fried Rice',
+    'Chicken Noodles',
+    'Chicken 65',
+    'Parotta with Kurma',
+    'Egg Kothu Parotta',
+    'Chicken Kothu Parotta',
+    'Sambar Rice',
+    'Curd Rice',
+    'Chicken Biryani',
+    'Chilli Parotta',
+    'Veg Rice',
+    'Veg Noodles',
+    'Gobi Rice',
+    'Gobi Noodles',
+  ];
 
-List<MenuItem> get defaultMenuItems {
-  return activeMenuItems.where((item) {
-    return defaultMenuNames.any(
-      (name) =>
-          item.name.toLowerCase().trim() ==
-          name.toLowerCase().trim(),
-    );
-  }).toList();
-}
-
-List<MenuItem> getByCategory(String category) {
-  switch (category) {
-    case 'Breakfast':
-      return breakfastItems;
-
-    case 'Meals':
-      return activeMenuItems.where((i) {
-        final name = i.name.toLowerCase();
-        return name.contains('meals') ||
-               name.contains('rice') ||
-               name.contains('biryani') ||
-               name.contains('curd') ||
-               name.contains('sambar');
-      }).toList();
-
-    case 'Chicken':
-      return activeMenuItems
-          .where((i) =>
-              i.name.toLowerCase().contains('chicken 65') ||
-              i.name.toLowerCase().contains('chicken'))
-          .toList();
-
-    case 'Rice & Noodles':
-      return activeMenuItems
-          .where((i) =>
-              i.name.toLowerCase().contains('fried rice') ||
-              i.name.toLowerCase().contains('noodle'))
-          .toList();
-
-    case 'Parotta & Kothu':
-      return activeMenuItems
-          .where((i) =>
-              i.name.toLowerCase().contains('parotta') ||
-              i.name.toLowerCase().contains('kothu'))
-          .toList();
-
-    case 'Egg':
-      return activeMenuItems
-          .where((i) =>
-              i.name.toLowerCase().contains('egg') ||
-              i.name.toLowerCase().contains('omelette') ||
-              i.name.toLowerCase().contains('kalaki'))
-          .toList();
-
-    case 'All':
-      return activeMenuItems;
-
-    default:
-      return [];
+  List<MenuItem> get defaultMenuItems {
+    return activeMenuItems.where((item) {
+      return defaultMenuNames.any(
+        (name) => item.name.toLowerCase().trim() == name.toLowerCase().trim(),
+      );
+    }).toList();
   }
-}
+
+  List<MenuItem> getByCategory(String category) {
+    switch (category) {
+      case 'Breakfast':
+        return breakfastItems;
+
+      case 'Meals':
+        return activeMenuItems.where((i) {
+          final name = i.name.toLowerCase();
+          return name.contains('meals') ||
+              name.contains('rice') ||
+              name.contains('biryani') ||
+              name.contains('curd') ||
+              name.contains('sambar');
+        }).toList();
+
+      case 'Chicken':
+        return activeMenuItems
+            .where((i) =>
+                i.name.toLowerCase().contains('chicken 65') ||
+                i.name.toLowerCase().contains('chicken'))
+            .toList();
+
+      case 'Rice & Noodles':
+        return activeMenuItems
+            .where((i) =>
+                i.name.toLowerCase().contains('fried rice') ||
+                i.name.toLowerCase().contains('noodle'))
+            .toList();
+
+      case 'Parotta & Kothu':
+        return activeMenuItems
+            .where((i) =>
+                i.name.toLowerCase().contains('parotta') ||
+                i.name.toLowerCase().contains('kothu'))
+            .toList();
+
+      case 'Egg':
+        return activeMenuItems
+            .where((i) =>
+                i.name.toLowerCase().contains('egg') ||
+                i.name.toLowerCase().contains('omelette') ||
+                i.name.toLowerCase().contains('kalaki'))
+            .toList();
+
+      case 'All':
+        return activeMenuItems;
+
+      default:
+        return [];
+    }
+  }
 
   void _initializeMenuItems() {
     // Clear existing items
@@ -300,7 +296,7 @@ List<MenuItem> getByCategory(String category) {
         category: 'lunch',
         isVeg: false,
       ),
-       MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Chicken Fried Rice',
         price: 110.00,
         quantity: '400 g',
@@ -328,15 +324,15 @@ List<MenuItem> getByCategory(String category) {
         category: 'lunch',
         isVeg: false,
       ),
-        MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Sambar Rice',
-        price: 40.00,
+        price: 60.00,
         quantity: '1',
         category: 'lunch',
       ),
       MenuItem.fromData(
         name: 'Curd Rice',
-        price: 40.00,
+        price: 60.00,
         quantity: '1',
         category: 'lunch',
       ),
@@ -396,13 +392,13 @@ List<MenuItem> getByCategory(String category) {
         quantity: '400 g',
         category: 'lunch',
       ),
-         MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Chapati with Kurma',
         price: 40.00,
         quantity: '2 pieces',
         category: 'lunch',
       ),
-         MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Veg Meals',
         price: 80.00,
         quantity: '1',
@@ -444,7 +440,7 @@ List<MenuItem> getByCategory(String category) {
         quantity: '400 g',
         category: 'lunch',
       ),
-       MenuItem.fromData(
+      MenuItem.fromData(
         name: 'Chicken 65',
         price: 120.00,
         quantity: '150 g',
