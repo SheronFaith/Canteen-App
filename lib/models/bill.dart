@@ -16,11 +16,18 @@ class Bill {
   @HiveField(3)
   final List<BillItem> items;
 
+  /// Human-friendly bill number printed on receipt, e.g. "t1".
+  ///
+  /// This is generated per-day and resets at local midnight.
+  @HiveField(4)
+  final String? billNo;
+
   const Bill({
     required this.id,
     required this.createdAt,
     required this.totalAmount,
     required this.items,
+    this.billNo,
   });
 }
 
@@ -41,13 +48,14 @@ class BillAdapter extends TypeAdapter<Bill> {
       createdAt: fields[1] as DateTime,
       totalAmount: fields[2] as double,
       items: (fields[3] as List).cast<BillItem>(),
+      billNo: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Bill obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -55,6 +63,8 @@ class BillAdapter extends TypeAdapter<Bill> {
       ..writeByte(2)
       ..write(obj.totalAmount)
       ..writeByte(3)
-      ..write(obj.items);
+      ..write(obj.items)
+      ..writeByte(4)
+      ..write(obj.billNo);
   }
 }

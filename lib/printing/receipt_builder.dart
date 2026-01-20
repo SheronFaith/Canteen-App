@@ -31,6 +31,17 @@ Future<Uint8List> buildEscPosReceipt(Bill bill) async {
     ),
   );
 
+  final billNo = bill.billNo;
+  if (billNo != null && billNo.trim().isNotEmpty) {
+    bytes.addAll(
+      generator.text(
+        _sanitizeEscPosText('Bill No: ${billNo.trim()}'),
+        styles: const PosStyles(align: PosAlign.center),
+        linesAfter: 1,
+      ),
+    );
+  }
+
   bytes.addAll(generator.hr());
 
   for (final item in bill.items) {
