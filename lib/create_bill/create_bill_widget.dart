@@ -14,9 +14,17 @@ import '/models/bill_item.dart';
 import '/services/bill_repository.dart';
 import '/printing/thermal_printer_service.dart';
 import 'package:flutter/rendering.dart';
+import '/order/order_widget.dart';
 
 class CreateBillWidget extends StatefulWidget {
-  const CreateBillWidget({super.key});
+  const CreateBillWidget({
+    super.key,
+    this.initialCartItems,
+  });
+
+  /// Optional prefilled items (e.g., coming from QR scan flow).
+  /// Map: itemId -> qty
+  final Map<String, int>? initialCartItems;
 
   static String routeName = 'CreateBill';
   static String routePath = '/createBill';
@@ -82,6 +90,12 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
     _model.textController?.addListener(_onSearchChanged);
 
     _scrollController = ScrollController();
+
+    final initial = widget.initialCartItems;
+    if (initial != null && initial.isNotEmpty) {
+      _cartItems.addAll(initial);
+      _updateTotalAmount();
+    }
 
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==
@@ -223,10 +237,13 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
   }
 
   Future<void> _onGenerateBillPressed() async {
-    void showSnack(String message) {
+    void showSnack(String message, {SnackBarAction? action}) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          content: Text(message),
+          action: action,
+        ),
       );
     }
 
@@ -288,7 +305,18 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
 
     if (printedOk) {
       await const BillRepository().addBill(bill);
-      showSnack('Bill printed & saved');
+      showSnack(
+        'Bill printed & saved',
+        action: SnackBarAction(
+          label: 'SCAN ORDER',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrderWidget()),
+            );
+          },
+        ),
+      );
       _clearCart();
     } else {
       showSnack(
@@ -369,6 +397,31 @@ class _CreateBillWidgetState extends State<CreateBillWidget> {
                             ),
                           ),
                         ),
+                          SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const OrderWidget(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.qr_code_scanner_rounded,
+                                size: 18,
+                                color: Color(0xFF333333),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
                           Container(
                             height: 36,
                             padding: EdgeInsets.symmetric(horizontal: 16),
